@@ -1,0 +1,17 @@
+.idea
+.awcache
+.DS_Store
+.vscode
+.eslintcache
+
+/common/node_modules
+/common/dist
+/common/package-lock.json
+
+/rest/node_modules
+/rest/dist
+/rest/package-lock.json
+
+/ssr/node_modules
+/ssr/dist
+/ssr/package-lock.json
