@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"declaration": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": true,
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"skipLibCheck": true,
+		"target": "es6",
+		"baseUrl": ".",
+		"paths": {
+			"*": [ "src/*" ]
+		},
+		"outDir": "./dist/"
+	},
+	"include": [
+		"typings/index.d.ts",
+		"src/**/*"
+	]
+}

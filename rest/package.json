@@ -1,0 +1,43 @@
+{
+	"name": "@nervejs/rest",
+	"version": "0.0.2",
+	"description": "",
+	"main": "dist/index",
+	"typings": "dist/index",
+	"scripts": {
+		"clean": "rm -rf ./dist",
+		"ts": "./node_modules/.bin/tsc",
+		"build": "npm run clean && npm run ts",
+		"dev": "./node_modules/.bin/tsc -w",
+		"test": "jest",
+		"eslint": "eslint 'src/**/*.{ts,tsx}' --cache",
+		"prepublish": "npm run build && npm run eslint && npm test && bump"
+	},
+	"author": "denis.yarkeev@gmail.com",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/express": "^4.17.0",
+		"@types/jest": "^24.0.15",
+		"@types/node": "^12.0.10",
+		"@types/request": "^2.48.1",
+		"@types/to-snake-case": "^1.0.0",
+		"@typescript-eslint/eslint-plugin": "^2.16.0",
+		"@typescript-eslint/parser": "^2.16.0",
+		"eslint": "^6.8.0",
+		"eslint-config-google": "^0.14.0",
+		"eslint-import-resolver-typescript": "^2.0.0",
+		"eslint-plugin-babel": "^5.3.0",
+		"eslint-plugin-import": "2.19.1",
+		"eslint-plugin-import-helpers": "^1.0.2",
+		"eslint-plugin-react": "^7.18.0",
+		"jest": "^24.8.0",
+		"ts-jest": "^24.0.2",
+		"typescript": "^3.7.5",
+		"version-bump-prompt": "^5.0.7"
+	},
+	"dependencies": {
+		"express": "^4.17.1",
+		"request": "^2.88.0",
+		"to-snake-case": "^1.0.0"
+	}
+}
