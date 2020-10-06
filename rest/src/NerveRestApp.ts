@@ -1,3 +1,4 @@
+import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as http from 'http';
 
@@ -12,6 +13,8 @@ import { INerveRestControllerOptions } from './interfaces';
 
 @Logger({ prefix: 'App' })
 export abstract class NerveRestApp extends NerveRestObject {
+
+	public BASE_URL = '';
 
 	protected express: express.Express = express();
 	protected server: http.Server;
@@ -38,6 +41,7 @@ export abstract class NerveRestApp extends NerveRestObject {
 
 	initMiddlewares() {
 		this.express.use(express.urlencoded({ extended: true }));
+		this.express.use(cookieParser());
 	}
 
 	stop() {

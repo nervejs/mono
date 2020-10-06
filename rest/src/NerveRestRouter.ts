@@ -1,5 +1,3 @@
-/* tslint:disable: non-literal-require */
-
 import { Express } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,6 +11,8 @@ import { NerveRestController } from './NerveRestController';
 import { NerveRestObject } from './NerveRestObject';
 
 import { INerveRestRouteModule } from './interfaces';
+
+const nativeRequire = eval('require');
 
 @Logger({ prefix: 'Router' })
 export class NerveRestRouter extends NerveRestObject {
@@ -43,8 +43,7 @@ export class NerveRestRouter extends NerveRestObject {
 				const routes = controllersDirs.map((dir: string) => this.getRouterItemByDir(dir));
 
 				routes.forEach((item) => {
-					// eslint-disable-next-line @typescript-eslint/no-var-requires
-					const { Controller }: { Controller: typeof NerveRestController} = require(path.resolve(item.module));
+					const { Controller }: { Controller: typeof NerveRestController} = nativeRequire(path.resolve(item.module));
 
 					item.actions = Controller.init(this.app, this.express, item);
 				});
@@ -93,9 +92,8 @@ export class NerveRestRouter extends NerveRestObject {
 	protected getRouterItemByDir(dir: string): INerveRestRouteModule {
 		const controllerName = `${capitalize(dir)}Controller`;
 		const module = `${this.controllersDir}/${dir}/${controllerName}`;
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const { Controller } = require(path.resolve(module));
-		const url = Controller.BASE_URL || `/${dir}`;
+		const { Controller } = nativeRequire(path.resolve(module));
+		const url = (this.app.BASE_URL + (Controller.BASE_URL || `/${dir.toLowerCase()}`)).replace(/\/+/g, '/');
 
 		return {
 			url,

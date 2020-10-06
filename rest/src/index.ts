@@ -5,4 +5,5 @@ export { NerveRestController } from './NerveRestController';
 export * from './enums';
 export * from './decorators';
 export * from './interfaces';
+export * from './utils';
 export * from './types';

@@ -1,6 +1,6 @@
 import { Express, Request, Response } from 'express';
 
-import { ENerveRestContentType, ENerveRestHTTPMethod, ENerveRestHTTPStaus, ENerveRestStandartAction } from './enums';
+import { ENerveRestContentType, ENerveRestHTTPMethod, ENerveRestHTTPStatus, ENerveRestStandartAction } from './enums';
 
 import { Log } from './utils';
 
@@ -35,9 +35,9 @@ export class NerveRestController extends NerveRestObject {
 
 	static init(app: NerveRestApp, express: Express, route: INerveRestRouteModule): INerveRestRouteAction[] {
 		const { url: routeUrl } = route;
-		const viewUrl = `${routeUrl}/:${this.viewPathParamName}`;
-		const deleteUrl = `${routeUrl}/:${this.deletePathParamName}`;
-		const updateUrl = `${routeUrl}/:${this.updatePathParamName}`;
+		const viewUrl = `${routeUrl}/:${this.viewPathParamName}`.replace(/\/+/g, '/');
+		const deleteUrl = `${routeUrl}/:${this.deletePathParamName}`.replace(/\/+/g, '/');
+		const updateUrl = `${routeUrl}/:${this.updatePathParamName}`.replace(/\/+/g, '/');
 		const routeActions: INerveRestRouteAction[] = [];
 		let customActions: INerveRestRouteAction[] = [];
 
@@ -46,7 +46,7 @@ export class NerveRestController extends NerveRestObject {
 		if (Array.isArray(this.prototype.__customActions)) {
 			customActions = this.prototype.__customActions.map((action) => ({
 				...action,
-				url: action.isAbsoluteUrl ? action.url : `${routeUrl}${action.url ? `/${action.url}` : ''}`,
+				url: (action.isAbsoluteUrl ? action.url : `${routeUrl}${action.url ? `/${action.url}` : ''}`).replace(/\/+/g, '/'),
 			}));
 
 			customActions.forEach((action) => {
@@ -118,7 +118,7 @@ export class NerveRestController extends NerveRestObject {
 			if (beforeResult.isAbort) {
 				Log.info(`(CONTROLLER: ${this.name}; ACTION: ${actionName}) ABORTED BY BEFORE ACTION`);
 
-				res.status(beforeResult.status || ENerveRestHTTPStaus.OK);
+				res.status(beforeResult.status || ENerveRestHTTPStatus.OK);
 				res.end(JSON.stringify(beforeResult.data || {}));
 			} else {
 				if (this.prototype.hasOwnProperty(actionName)) {
@@ -126,7 +126,7 @@ export class NerveRestController extends NerveRestObject {
 					result = await (controller as any)[actionName](req, res);
 				}
 
-				res.status(result.status || ENerveRestHTTPStaus.OK);
+				res.status(result.status || ENerveRestHTTPStatus.OK);
 				if (!result.contentType || result.contentType === ENerveRestContentType.JSON) {
 					res.setHeader('Content-Type', `${ENerveRestContentType.JSON}; charset=utf-8`);
 					res.end(JSON.stringify(result.data || {}));
@@ -138,7 +138,7 @@ export class NerveRestController extends NerveRestObject {
 		} catch (err) {
 			Log.error(`Error on ${req.method.toUpperCase()} ${req.url}`, err);
 
-			res.status(ENerveRestHTTPStaus.INTERNAL_ERROR);
+			res.status(ENerveRestHTTPStatus.INTERNAL_ERROR);
 			res.end();
 		}
 	}
@@ -149,31 +149,31 @@ export class NerveRestController extends NerveRestObject {
 
 	async index(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStaus.NOT_FOUND,
+			status: ENerveRestHTTPStatus.NOT_FOUND,
 		};
 	}
 
 	async view(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStaus.NOT_FOUND,
+			status: ENerveRestHTTPStatus.NOT_FOUND,
 		};
 	}
 
 	async create(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStaus.NOT_FOUND,
+			status: ENerveRestHTTPStatus.NOT_FOUND,
 		};
 	}
 
 	async update(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStaus.NOT_FOUND,
+			status: ENerveRestHTTPStatus.NOT_FOUND,
 		};
 	}
 
 	async delete(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStaus.NOT_FOUND,
+			status: ENerveRestHTTPStatus.NOT_FOUND,
 		};
 	}
 
