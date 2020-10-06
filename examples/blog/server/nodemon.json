@@ -1,0 +1,11 @@
+{
+	"watch": [
+		"./src",
+		"../../../common",
+		"../../../server"
+	],
+	"ext": "ts",
+	"ignore": [],
+	"delay": "1000",
+	"exec": "./bin/run -w 1"
+}

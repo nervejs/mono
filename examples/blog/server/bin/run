@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const { spawn } = require('child_process');
+const { runner } = require('@nervejs/server');
+
+process.env.NODE_PATH = [
+	path.resolve(__dirname, '../dist')
+].join(':');
+
+runner({
+	pathToProject: './dist/',
+	port: 12000
+});

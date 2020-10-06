@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"sourceMap": true,
+		"declaration": true,
+		"skipLibCheck": true,
+		"pretty": true,
+		"noImplicitAny": true,
+		"noUnusedLocals": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es5",
+		"experimentalDecorators": true,
+		"jsx": "react",
+		"allowJs": false,
+		"baseUrl": ".",
+		"outDir": "dist",
+		"paths": {
+			"*": [ "src/*" ]
+		},
+		"lib": [
+			"es6",
+			"dom"
+		]
+	},
+	"include": [
+		"typings/index.d.ts",
+		"src/**/*"
+	]
+}

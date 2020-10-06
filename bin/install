@@ -10,8 +10,8 @@ rm -rf ./common/node_modules
 echo "CLEAN ./rest/node_modules"
 rm -rf ./rest/node_modules
 
-echo "CLEAN ./ssr/node_modules"
-rm -rf ./ssr/node_modules
+echo "CLEAN ./server/node_modules"
+rm -rf ./server/node_modules
 
 # CLEAN GIT HOOKS
 rm -rf .git/hooks/pre-commit
@@ -26,5 +26,5 @@ cd ./common && npm install && cd -
 echo "INSTALL REST"
 cd ./rest && npm install && cd -
 
-echo "INSTALL SSR"
-cd ./ssr && npm install && cd -
+echo "INSTALL server"
+cd ./server && npm install && cd -

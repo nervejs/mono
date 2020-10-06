@@ -1,0 +1,21 @@
+{
+	"name": "@nervejs/example-blog-server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"scripts": {
+		"clean": "rm -rf ./dist",
+		"ts": "tsc",
+		"build": "npm run clean && npm run ts",
+		"dev": "npm run build && (ts -- -w & nodemon)"
+	},
+	"author": "denis.yarkeev@gmail.com",
+	"license": "MIT",
+	"dependencies": {
+		"@nervejs/server": "file:../../../server"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.4",
+		"typescript": "^3.9.7"
+	}
+}

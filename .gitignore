@@ -12,6 +12,10 @@
 /rest/dist
 /rest/package-lock.json
 
-/ssr/node_modules
-/ssr/dist
-/ssr/package-lock.json
+/server/node_modules
+/server/dist
+/server/package-lock.json
+
+/examples/blog/server/node_modules
+/examples/blog/server/dist
+/examples/blog/server/package-lock.json
