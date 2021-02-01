@@ -1,6 +1,6 @@
 {
 	"name": "@nervejs/rest",
-	"version": "0.0.11",
+	"version": "0.0.12",
 	"description": "",
 	"main": "dist/index",
 	"typings": "dist/index",
@@ -11,7 +11,7 @@
 		"dev": "./node_modules/.bin/tsc -w",
 		"test": "jest",
 		"eslint": "eslint 'src/**/*.{ts,tsx}' --cache",
-		"prepublish": "npm run build && npm run eslint && npm test && bump"
+		"prepublishOnly": "npm run build && npm run eslint && npm test && bump"
 	},
 	"author": "denis.yarkeev@gmail.com",
 	"license": "MIT",

@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-misused-promises: "off" */
+
 import { Express, Request, Response } from 'express';
 
 import { ENerveRestContentType, ENerveRestHTTPMethod, ENerveRestHTTPStatus, ENerveRestStandartAction } from './enums';
@@ -61,6 +63,10 @@ export class NerveRestController extends NerveRestObject {
 						break;
 					case ENerveRestHTTPMethod.PUT:
 						express.put(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
+						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
+						break;
+					case ENerveRestHTTPMethod.PATCH:
+						express.patch(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
 					case ENerveRestHTTPMethod.DELETE:
