@@ -11,7 +11,7 @@
 		"dev": "./node_modules/.bin/tsc -w",
 		"test": "jest",
 		"eslint": "eslint 'src/**/*.{ts,tsx}' --cache",
-		"prepublishOnly": "npm run build && npm test && bump"
+		"prepublishOnly": "npm run build && npm run eslint && npm test && bump"
 	},
 	"author": "denis.yarkeev@gmail.com",
 	"license": "MIT",
