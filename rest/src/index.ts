@@ -1,6 +1,7 @@
 export { NerveRestApp } from './NerveRestApp';
 export { NerveRestRouter } from './NerveRestRouter';
 export { NerveRestController } from './NerveRestController';
+export { NerveRestAuth } from './NerveRestAuth';
 
 export * from './enums';
 export * from './decorators';

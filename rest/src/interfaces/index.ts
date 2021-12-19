@@ -1,3 +1,4 @@
+export * from './INerveRestAuthOptions';
 export * from './INerveRestControllerBeforeActionResult';
 export * from './INerveRestControllerOptions';
 export * from './INerveRestControllerRequestParams';

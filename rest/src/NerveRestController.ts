@@ -7,6 +7,7 @@ import { Log } from './utils';
 import { Logger } from './decorators';
 
 import { NerveRestApp } from './NerveRestApp';
+import { NerveRestAuth } from './NerveRestAuth';
 import { NerveRestObject } from './NerveRestObject';
 
 import {
@@ -23,8 +24,10 @@ import { NerveRestRequest, NerveRestResponse } from './types';
 export class NerveRestController extends NerveRestObject {
 
 	__customActions: INerveRestRouteAction[];
+	__authRequired: string[];
 
 	protected options: INerveRestControllerOptions;
+	protected currentUser: unknown;
 
 	static app: NerveRestApp;
 	static viewPathParamName = 'id';
@@ -121,18 +124,34 @@ export class NerveRestController extends NerveRestObject {
 				res.status(beforeResult.status || ENerveRestHTTPStatus.OK);
 				res.end(JSON.stringify(beforeResult.data || {}));
 			} else {
-				if (this.prototype.hasOwnProperty(actionName)) {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					result = await (controller as any)[actionName](req, res);
-				}
+				const isAuthRequired = Array.isArray(this.prototype.__authRequired) && this.prototype.__authRequired.includes(actionName);
+				const decodedToken = await NerveRestAuth.validateToken(req);
+				const isAuthorized = !!decodedToken;
 
-				res.status(result.status || ENerveRestHTTPStatus.OK);
-				if (!result.contentType || result.contentType === ENerveRestContentType.JSON) {
-					res.setHeader('Content-Type', `${ENerveRestContentType.JSON}; charset=utf-8`);
-					res.end(JSON.stringify(result.data || {}));
+				if (isAuthRequired && !isAuthorized) {
+					const error = NerveRestAuth.getError();
+
+					res.setHeader('Content-Type', `${error.contentType}; charset=utf-8`);
+					res.status(error.status);
+					res.end(JSON.stringify(error.data));
 				} else {
-					res.setHeader('Content-Type', `${result.contentType || 'application/octet-stream'}; charset=utf-8`);
-					res.end(result.data);
+					if (this.prototype.hasOwnProperty(actionName)) {
+						if (isAuthorized) {
+							controller.currentUser = await NerveRestAuth.getCurrentUser(decodedToken);
+						}
+
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						result = await (controller as any)[actionName](req, res);
+					}
+
+					res.status(result.status || ENerveRestHTTPStatus.OK);
+					if (!result.contentType || result.contentType === ENerveRestContentType.JSON) {
+						res.setHeader('Content-Type', `${ENerveRestContentType.JSON}; charset=utf-8`);
+						res.end(JSON.stringify(result.data || {}));
+					} else {
+						res.setHeader('Content-Type', `${result.contentType || 'application/octet-stream'}; charset=utf-8`);
+						res.end(result.data);
+					}
 				}
 			}
 		} catch (err) {

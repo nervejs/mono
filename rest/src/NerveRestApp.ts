@@ -6,10 +6,11 @@ import { ENerveRestLogLevel } from './enums';
 
 import { Logger } from './decorators';
 
+import { NerveRestAuth } from './NerveRestAuth';
 import { NerveRestObject } from './NerveRestObject';
 import { NerveRestRouter } from './NerveRestRouter';
 
-import { INerveRestControllerOptions } from './interfaces';
+import { INerveRestAuthOptions, INerveRestControllerOptions } from './interfaces';
 
 @Logger({ prefix: 'App' })
 export abstract class NerveRestApp extends NerveRestObject {
@@ -24,6 +25,7 @@ export abstract class NerveRestApp extends NerveRestObject {
 
 	async run() {
 		this.initMiddlewares();
+		this.initAuth();
 
 		this.router.setExpress(this.express);
 		await this.router.init(this);
@@ -43,6 +45,26 @@ export abstract class NerveRestApp extends NerveRestObject {
 		this.express.use(express.urlencoded({ extended: true }));
 		this.express.use(cookieParser());
 	}
+
+	initAuth() {
+		NerveRestAuth.init(this.getAuthOptions());
+	}
+
+	getAuthOptions(): INerveRestAuthOptions {
+		return {
+			secret: '',
+			async login() {
+				this.log.error('Method getAuthOptions is not defined');
+
+				return false;
+			},
+			async getCurrentUser() {
+				this.log.error('Method getCurrentUser is not defined');
+
+				return false;
+			},
+		};
+	};
 
 	stop() {
 		this.server.close();
