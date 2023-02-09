@@ -1,7 +1,9 @@
-import { ENerveRestContentType, ENerveRestHTTPStatus } from '../enums';
+import { ENerveContentType, ENerveHTTPStatus } from '../enums';
 
-export interface INerveRestControllerResult<T = {}> {
-	status?: ENerveRestHTTPStatus;
-	data?: T;
-	contentType?: ENerveRestContentType;
+import { INerveRestControllerErrorResult } from './INerveRestControllerErrorResult';
+
+export interface INerveRestControllerResult<T = unknown, P = INerveRestControllerErrorResult> {
+	status?: ENerveHTTPStatus;
+	data?: T | P;
+	contentType?: ENerveContentType;
 }

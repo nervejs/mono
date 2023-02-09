@@ -1,7 +1,7 @@
-import { ENerveRestHTTPStatus } from '../enums';
+import { ENerveHTTPStatus } from '../enums';
 
 export interface INerveRestControllerBeforeActionResult {
 	isAbort: boolean;
-	status?: ENerveRestHTTPStatus;
+	status?: ENerveHTTPStatus;
 	data?: unknown;
 }

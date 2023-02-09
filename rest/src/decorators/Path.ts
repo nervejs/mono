@@ -1,5 +1,10 @@
+/* eslint-disable
+	@typescript-eslint/no-explicit-any,
+	@typescript-eslint/no-unsafe-member-access,
+	@typescript-eslint/no-unsafe-return
+*/
+
 export const Path = (paramName: string) => {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
 		target.constructor[`${propertyKey}PathParamName`] = paramName;
 

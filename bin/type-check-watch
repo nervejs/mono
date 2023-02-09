@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+pids=();
+
+function kill_processes() {
+	echo "KILL PIDS: ${pids[@]}"
+
+	for pid in "${pids[@]}"; do
+		kill -9 $pid;
+	done
+
+	exit 0;
+}
+
+cd ./common && npm run type-check:watch & pids+=($!)
+cd ./rest && npm run type-check:watch & pids+=($!)
+cd ./server && npm run type-check:watch & pids+=($!)
+
+trap kill_processes SIGHUP SIGINT SIGTERM
+wait

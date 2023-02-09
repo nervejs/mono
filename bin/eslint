@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+npm run eslint-common
+npm run eslint-rest
+npm run eslint-server

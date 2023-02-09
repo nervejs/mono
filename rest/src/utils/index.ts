@@ -1,2 +1,1 @@
-export * from './capitalize';
-export * from './Log';
+export * from '@common/utils';

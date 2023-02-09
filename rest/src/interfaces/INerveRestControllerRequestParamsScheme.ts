@@ -1,4 +1,4 @@
-import { ENerveRestControllerRequestParamsType } from 'enums';
+import { ENerveRestControllerRequestParamsType } from '@enums';
 
 export interface INerveRestControllerRequestParamsSchemeItem {
 	type: ENerveRestControllerRequestParamsType;

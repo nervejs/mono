@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd ./common && npm run type-check && cd -
+cd ./rest && npm run type-check && cd -
+cd ./server && npm run type-check && cd -

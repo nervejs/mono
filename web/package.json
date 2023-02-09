@@ -1,0 +1,39 @@
+{
+	"name": "@nervejs/web",
+	"version": "1.0.4",
+	"description": "",
+	"main": "dist/index",
+	"typings": "dist/index",
+	"scripts": {
+		"clean": "rm -rf ./dist",
+		"ts": "tsc",
+		"type-check": "npm run ts -- --emitDeclarationOnly",
+		"type-check:watch": "npm run type-check -- --watch",
+		"build": "npm run clean && npm run ts && tsc-alias",
+		"dev": "npm run ts -- -w & tsc-alias -w",
+		"test": "jest",
+		"eslint": "../node_modules/.bin/eslint 'src/**/*.{ts,tsx}' --cache",
+		"prepublishOnly": "npm run build && npm run eslint && bump"
+	},
+	"author": "denis.yarkeev@gmail.com",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^27.0.3",
+		"@types/react": "^17.0.38",
+		"jest": "^27.4.5",
+		"ts-jest": "^27.1.2",
+		"tsc-alias": "^1.5.0",
+		"typescript": "^4.5.4",
+		"version-bump-prompt": "^6.1.0"
+	},
+	"dependencies": {
+		"@nervejs/common": "^1.0.5",
+		"react-redux": "^7.2.6",
+		"redux": "^4.1.2",
+		"redux-devtools-extension": "^2.13.9",
+		"redux-thunk": "^2.4.1",
+		"typescript-fsa": "^3.0.0",
+		"typescript-fsa-reducers": "^1.2.2",
+		"typescript-fsa-redux-thunk": "^2.10.2"
+	}
+}

@@ -2,6 +2,7 @@ import { Action, Auth, NerveRestController, NerveRestRequest, NerveRestResponse 
 
 export class UserController extends NerveRestController {
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	@Auth()
 	@Action({})
 	async current(req: NerveRestRequest, res: NerveRestResponse) {

@@ -1,10 +1,11 @@
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
+import * as fileUpload from 'express-fileupload';
 import * as http from 'http';
 
-import { ENerveRestLogLevel } from './enums';
+import { ENerveLogLevel } from '@enums';
 
-import { Logger } from './decorators';
+import { Logger } from '@decorators';
 
 import { NerveRestAuth } from './NerveRestAuth';
 import { NerveRestObject } from './NerveRestObject';
@@ -25,7 +26,7 @@ export abstract class NerveRestApp extends NerveRestObject {
 
 	async run() {
 		this.initMiddlewares();
-		this.initAuth();
+		// this.initAuth();
 
 		this.router.setExpress(this.express);
 		await this.router.init(this);
@@ -37,13 +38,17 @@ export abstract class NerveRestApp extends NerveRestObject {
 			this.log.info(`Listen port ${this.port} on host ${this.host}`);
 			this.log.info(`URL http://${this.host}:${this.port}`);
 
-			this.server = this.express.listen(this.port, this.host, resolve);
+			this.server = this.express.listen(this.port, this.host, () => resolve(void 0));
 		});
 	}
 
 	initMiddlewares() {
 		this.express.use(express.urlencoded({ extended: true }));
 		this.express.use(cookieParser());
+		this.express.use(fileUpload({
+			useTempFiles: true,
+			tempFileDir: '/tmp/nerve-rest-express-fileupload',
+		}));
 	}
 
 	initAuth() {
@@ -53,18 +58,22 @@ export abstract class NerveRestApp extends NerveRestObject {
 	getAuthOptions(): INerveRestAuthOptions {
 		return {
 			secret: '',
+			// eslint-disable-next-line @typescript-eslint/require-await
 			async login() {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
 				this.log.error('Method getAuthOptions is not defined');
 
 				return false;
 			},
+			// eslint-disable-next-line @typescript-eslint/require-await
 			async getCurrentUser() {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
 				this.log.error('Method getCurrentUser is not defined');
 
 				return false;
 			},
 		};
-	};
+	}
 
 	stop() {
 		this.server.close();
@@ -82,7 +91,7 @@ export abstract class NerveRestApp extends NerveRestObject {
 		return {};
 	}
 
-	protected setLogLevel(logLevel: ENerveRestLogLevel) {
+	protected setLogLevel(logLevel: ENerveLogLevel) {
 		this.log.setLevel(logLevel);
 	}
 

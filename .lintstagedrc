@@ -1,0 +1,5 @@
+{
+	"./common/src/**/*.{ts,tsx}": "npm run eslint-common",
+	"./rest/src/**/*.{ts,tsx}": "npm run eslint-rest",
+	"./server/src/**/*.{ts,tsx}": "npm run eslint-server"
+}

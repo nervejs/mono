@@ -4,18 +4,25 @@
 .vscode
 .eslintcache
 
+/node_modules
+/.eslintcache
+
 /common/node_modules
 /common/dist
-/common/package-lock.json
+/common/.eslintcache
 
 /rest/node_modules
 /rest/dist
-/rest/package-lock.json
+/rest/.eslintcache
 
 /server/node_modules
 /server/dist
-/server/package-lock.json
+/server/.eslintcache
+
+/web/node_modules
+/web/dist
+/web/.eslintcache
 
 /examples/blog/server/node_modules
 /examples/blog/server/dist
-/examples/blog/server/package-lock.json
+/examples/blog/server/.eslintcache

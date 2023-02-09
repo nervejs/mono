@@ -1,7 +1,7 @@
-import { ENerveRestHTTPMethod } from '../enums/ENerveRestHTTPMethod';
+import { ENerveHTTPMethod } from '@common/enums/ENerveHTTPMethod';
 
 export interface INerveRestRouteAction {
-	method: ENerveRestHTTPMethod;
+	method: ENerveHTTPMethod;
 	url: string;
 	action: string;
 	isAbsoluteUrl?: string;

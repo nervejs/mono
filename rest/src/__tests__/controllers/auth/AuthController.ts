@@ -1,6 +1,6 @@
 import {
 	Action,
-	ENerveRestHTTPMethod,
+	ENerveHTTPMethod,
 	NerveRestAuth,
 	NerveRestController,
 	NerveRestRequest,
@@ -12,17 +12,20 @@ export class AuthController extends NerveRestController {
 
 	@Action({
 		request: authControllerLoginParamsScheme,
-		method: ENerveRestHTTPMethod.POST,
+		method: ENerveHTTPMethod.POST,
 	})
 	async login(req: NerveRestRequest<IAuthControllerLoginParams>, res: NerveRestResponse) {
 		const { login, password } = req.body;
+		const result = await NerveRestAuth.login({ login, password });
 
-		if (NerveRestAuth.login({ login, password })) {
+		if (result) {
 			return {
 				data: {
 					accessToken: NerveRestAuth.getToken({ login }),
 				},
 			};
+		} else {
+			return null;
 		}
 	}
 

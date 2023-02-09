@@ -1,28 +1,30 @@
-/* tslint:disable: no-http-string */
-
 import * as request from 'request';
 
 import { TestApp } from './TestApp';
 
 describe('App', () => {
-	it('run', async (done) => {
+	it('run', (done) => {
 		const app = new TestApp();
 		const url = `http://127.0.0.1:${app.getPort()}`;
 
-		await app.run();
+		app.run()
+			.then(() => {
+				request(url, (error: Error) => {
+					expect(error)
+						.toBe(null);
 
-		request(url, (error: Error) => {
-			expect(error)
-				.toBe(null);
+					app.stop();
 
-			app.stop();
+					request(url, (err: NodeJS.ErrnoException) => {
+						expect(err.code)
+							.toBe('ECONNREFUSED');
 
-			request(url, (error: NodeJS.ErrnoException) => {
-				expect(error.code)
-					.toBe('ECONNREFUSED');
-
-				done();
+						done();
+					});
+				});
+			})
+			.catch((err) => {
+				done('Failed run app');
 			});
-		});
 	});
 });

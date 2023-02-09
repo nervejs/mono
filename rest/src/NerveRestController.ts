@@ -2,7 +2,7 @@
 
 import { Express, Request, Response } from 'express';
 
-import { ENerveRestContentType, ENerveRestHTTPMethod, ENerveRestHTTPStatus, ENerveRestStandartAction } from './enums';
+import { ENerveContentType, ENerveHTTPMethod, ENerveHTTPStatus, ENerveRestStandardAction } from './enums';
 
 import { Log } from './utils';
 
@@ -51,28 +51,28 @@ export class NerveRestController extends NerveRestObject {
 		if (Array.isArray(this.prototype.__customActions)) {
 			customActions = this.prototype.__customActions.map((action) => ({
 				...action,
-				url: (action.isAbsoluteUrl ? action.url : `${routeUrl}${action.url ? `/${action.url}` : ''}`).replace(/\/+/g, '/'),
+				url: (action.isAbsoluteUrl ? action.url : `${routeUrl}${action.url ? '/' + action.url : ''}`).replace(/\/+/g, '/'),
 			}));
 
 			customActions.forEach((action) => {
 				switch (action.method) {
-					case ENerveRestHTTPMethod.GET:
+					case ENerveHTTPMethod.GET:
 						express.get(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
-					case ENerveRestHTTPMethod.POST:
+					case ENerveHTTPMethod.POST:
 						express.post(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
-					case ENerveRestHTTPMethod.PUT:
+					case ENerveHTTPMethod.PUT:
 						express.put(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
-					case ENerveRestHTTPMethod.PATCH:
+					case ENerveHTTPMethod.PATCH:
 						express.patch(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
-					case ENerveRestHTTPMethod.DELETE:
+					case ENerveHTTPMethod.DELETE:
 						express.delete(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						express.options(action.url, async (req: Request, res: Response) => this.wrapper(action.action, req, res));
 						break;
@@ -81,33 +81,33 @@ export class NerveRestController extends NerveRestObject {
 		}
 
 		if (this.prototype.hasOwnProperty('index')) {
-			express.get(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.INDEX, req, res));
-			express.options(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.INDEX, req, res));
-			routeActions.push({ method: ENerveRestHTTPMethod.GET, url: routeUrl, action: ENerveRestStandartAction.INDEX });
+			express.get(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.INDEX, req, res));
+			express.options(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.INDEX, req, res));
+			routeActions.push({ method: ENerveHTTPMethod.GET, url: routeUrl, action: ENerveRestStandardAction.INDEX });
 		}
 
 		if (this.prototype.hasOwnProperty('view')) {
-			express.get(viewUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.VIEW, req, res));
-			express.options(viewUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.VIEW, req, res));
-			routeActions.push({ method: ENerveRestHTTPMethod.GET, url: viewUrl, action: ENerveRestStandartAction.VIEW });
+			express.get(viewUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.VIEW, req, res));
+			express.options(viewUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.VIEW, req, res));
+			routeActions.push({ method: ENerveHTTPMethod.GET, url: viewUrl, action: ENerveRestStandardAction.VIEW });
 		}
 
 		if (this.prototype.hasOwnProperty('create')) {
-			express.post(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.CREATE, req, res));
-			express.options(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.CREATE, req, res));
-			routeActions.push({ method: ENerveRestHTTPMethod.POST, url: routeUrl, action: ENerveRestStandartAction.CREATE });
+			express.post(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.CREATE, req, res));
+			express.options(routeUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.CREATE, req, res));
+			routeActions.push({ method: ENerveHTTPMethod.POST, url: routeUrl, action: ENerveRestStandardAction.CREATE });
 		}
 
 		if (this.prototype.hasOwnProperty('update')) {
-			express.put(updateUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.UPDATE, req, res));
-			express.options(updateUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.UPDATE, req, res));
-			routeActions.push({ method: ENerveRestHTTPMethod.PUT, url: updateUrl, action: ENerveRestStandartAction.UPDATE });
+			express.put(updateUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.UPDATE, req, res));
+			express.options(updateUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.UPDATE, req, res));
+			routeActions.push({ method: ENerveHTTPMethod.PUT, url: updateUrl, action: ENerveRestStandardAction.UPDATE });
 		}
 
 		if (this.prototype.hasOwnProperty('delete')) {
-			express.delete(deleteUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.DELETE, req, res));
-			express.options(deleteUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandartAction.DELETE, req, res));
-			routeActions.push({ method: ENerveRestHTTPMethod.DELETE, url: deleteUrl, action: ENerveRestStandartAction.DELETE });
+			express.delete(deleteUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.DELETE, req, res));
+			express.options(deleteUrl, async (req: Request, res: Response) => this.wrapper(ENerveRestStandardAction.DELETE, req, res));
+			routeActions.push({ method: ENerveHTTPMethod.DELETE, url: deleteUrl, action: ENerveRestStandardAction.DELETE });
 		}
 
 		return routeActions.concat(customActions);
@@ -120,14 +120,14 @@ export class NerveRestController extends NerveRestObject {
 
 			controller.setOptions(this.app.getControllerOptions());
 
-			const beforeResult = await controller.beforeAction(actionName, req, res);
+			const beforeResult = await controller.beforeAction(actionName, req as unknown as NerveRestRequest, res as unknown as NerveRestResponse);
 
 			Log.info(`WRAP REQUEST (CONTROLLER: ${this.name}; ACTION: ${actionName})`);
 
 			if (beforeResult.isAbort) {
 				Log.info(`(CONTROLLER: ${this.name}; ACTION: ${actionName}) ABORTED BY BEFORE ACTION`);
 
-				res.status(beforeResult.status || ENerveRestHTTPStatus.OK);
+				res.status(beforeResult.status || ENerveHTTPStatus.OK);
 				res.end(JSON.stringify(beforeResult.data || {}));
 			} else {
 				const isAuthRequired = Array.isArray(this.prototype.__authRequired) && this.prototype.__authRequired.includes(actionName);
@@ -137,6 +137,7 @@ export class NerveRestController extends NerveRestObject {
 				if (isAuthRequired && !isAuthorized) {
 					const error = NerveRestAuth.getError();
 
+					// eslint-disable-next-line sonarjs/no-duplicate-string
 					res.setHeader('Content-Type', `${error.contentType}; charset=utf-8`);
 					res.status(error.status);
 					res.end(JSON.stringify(error.data));
@@ -147,12 +148,12 @@ export class NerveRestController extends NerveRestObject {
 						}
 
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						result = await (controller as any)[actionName](req, res);
+						result = await (controller as unknown as Record<string, (...args: unknown[]) => Promise<INerveRestControllerResult>>)[actionName](req, res);
 					}
 
-					res.status(result.status || ENerveRestHTTPStatus.OK);
-					if (!result.contentType || result.contentType === ENerveRestContentType.JSON) {
-						res.setHeader('Content-Type', `${ENerveRestContentType.JSON}; charset=utf-8`);
+					res.status(result.status || ENerveHTTPStatus.OK);
+					if (!result.contentType || result.contentType === ENerveContentType.JSON) {
+						res.setHeader('Content-Type', `${ENerveContentType.JSON}; charset=utf-8`);
 						res.end(JSON.stringify(result.data || {}));
 					} else {
 						res.setHeader('Content-Type', `${result.contentType || 'application/octet-stream'}; charset=utf-8`);
@@ -161,9 +162,9 @@ export class NerveRestController extends NerveRestObject {
 				}
 			}
 		} catch (err) {
-			Log.error(`Error on ${req.method.toUpperCase()} ${req.url}`, err);
+			Log.error(`Error on ${req.method.toUpperCase()} ${req.url}`, err as Error);
 
-			res.status(ENerveRestHTTPStatus.INTERNAL_ERROR);
+			res.status(ENerveHTTPStatus.INTERNAL_ERROR);
 			res.end();
 		}
 	}
@@ -172,37 +173,43 @@ export class NerveRestController extends NerveRestObject {
 		this.options = options;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	async index(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStatus.NOT_FOUND,
+			status: ENerveHTTPStatus.NOT_FOUND,
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await,sonarjs/no-identical-functions
 	async view(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStatus.NOT_FOUND,
+			status: ENerveHTTPStatus.NOT_FOUND,
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await,sonarjs/no-identical-functions
 	async create(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStatus.NOT_FOUND,
+			status: ENerveHTTPStatus.NOT_FOUND,
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await,sonarjs/no-identical-functions
 	async update(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStatus.NOT_FOUND,
+			status: ENerveHTTPStatus.NOT_FOUND,
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await,sonarjs/no-identical-functions
 	async delete(req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerResult> {
 		return {
-			status: ENerveRestHTTPStatus.NOT_FOUND,
+			status: ENerveHTTPStatus.NOT_FOUND,
 		};
 	}
 
-	protected async beforeAction(method: string, req: Request, res: Response): Promise<INerveRestControllerBeforeActionResult> {
+	// eslint-disable-next-line @typescript-eslint/require-await
+	protected async beforeAction(method: string, req: NerveRestRequest, res: NerveRestResponse): Promise<INerveRestControllerBeforeActionResult> {
 		return { isAbort: false };
 	}
 

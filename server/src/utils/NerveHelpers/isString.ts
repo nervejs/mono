@@ -1,1 +1,0 @@
-export const isString = (object: unknown) => typeof object === 'string';

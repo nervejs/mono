@@ -1,1 +1,0 @@
-export const isFunction = (object: unknown) => typeof object === 'function';

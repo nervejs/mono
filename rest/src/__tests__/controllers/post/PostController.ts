@@ -7,12 +7,14 @@ import {
 
 export class PostController extends NerveRestController {
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	async index(req: NerveRestRequest, res: NerveRestResponse) {
 		return {
 			data: { ok: true },
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	@Action({
 		request: postControllerViewParamsScheme,
 	})
@@ -25,6 +27,7 @@ export class PostController extends NerveRestController {
 		};
 	}
 
+	// eslint-disable-next-line sonarjs/no-identical-functions,@typescript-eslint/require-await
 	async create(req: NerveRestRequest<IPostControllerCreateParams>, res: NerveRestResponse) {
 		return {
 			data: { ok: true },

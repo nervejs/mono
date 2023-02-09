@@ -1,5 +1,8 @@
-export * from './ILocalesItem';
-export * from './INerveRequest';
-export * from './INerveResponse';
-export * from './INerveRoute';
-export * from './INerveRouteList';
+export * from '@common/interfaces';
+
+export * from './INerveServerConfig';
+export * from './INerveServerCookies';
+export * from './INerveServerHeaders';
+export * from './INerveServerQueryString';
+export * from './INerveServerRoute';
+export * from './INerveServerUpstreamsConfigPoolItem';

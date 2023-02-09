@@ -1,4 +1,4 @@
-import { ENerveRestLogLevel, INerveRestAuthLoginParams, INerveRestAuthOptions, NerveRestApp } from '..';
+import { ENerveLogLevel, INerveRestAuthLoginParams, INerveRestAuthOptions, NerveRestApp } from '..';
 
 import { TestRouter } from './TestRouter';
 
@@ -9,7 +9,7 @@ export class TestApp extends NerveRestApp {
 	protected router: TestRouter = new TestRouter();
 
 	async run() {
-		this.setLogLevel(ENerveRestLogLevel.DEBUG);
+		this.setLogLevel(ENerveLogLevel.DEBUG);
 
 		return super.run();
 	}
@@ -17,9 +17,11 @@ export class TestApp extends NerveRestApp {
 	getAuthOptions(): INerveRestAuthOptions {
 		return {
 			secret: '12345',
+			// eslint-disable-next-line @typescript-eslint/require-await
 			async login(params: INerveRestAuthLoginParams) {
 				return true;
 			},
+			// eslint-disable-next-line @typescript-eslint/require-await
 			async getCurrentUser(params: INerveRestAuthLoginParams) {
 				return null;
 			},

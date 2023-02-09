@@ -2,7 +2,7 @@ import * as bcrypt from 'bcryptjs';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 
-import { ENerveRestContentType, ENerveRestHTTPStatus } from './enums';
+import { ENerveContentType, ENerveHTTPStatus } from './enums';
 
 import { Logger } from './decorators';
 
@@ -17,7 +17,7 @@ export class NerveRestAuth extends NerveRestObject {
 
 	static init(options: INerveRestAuthOptions) {
 		this.options = options;
-	};
+	}
 
 	static async getEncryptedPassword(password: string) {
 		return bcrypt.hash(password, 10);
@@ -40,17 +40,16 @@ export class NerveRestAuth extends NerveRestObject {
 			data as Buffer,
 			this.options.secret,
 		);
-	};
+	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	static async validateToken(req: Request) {
 		const authorization = req.headers.authorization;
 		const [, token] = authorization ? authorization.split(' ') : [];
 
 		if (token) {
 			try {
-				const decoded = jwt.verify(token, this.options.secret);
-
-				return decoded;
+				return jwt.verify(token, this.options.secret);
 			} catch (err) {
 				return false;
 			}
@@ -59,13 +58,13 @@ export class NerveRestAuth extends NerveRestObject {
 		}
 	}
 
-	static getError<T extends {}>(): INerveRestControllerResult<T> {
+	static getError<T>(): INerveRestControllerResult<T> {
 		return {
-			contentType: ENerveRestContentType.JSON,
-			status: ENerveRestHTTPStatus.UNAUTHORIZED,
+			contentType: ENerveContentType.JSON,
+			status: ENerveHTTPStatus.UNAUTHORIZED,
 			data: {
 				error: '',
-				code: ENerveRestHTTPStatus.UNAUTHORIZED,
+				code: ENerveHTTPStatus.UNAUTHORIZED,
 			} as unknown as T,
 		};
 	}
