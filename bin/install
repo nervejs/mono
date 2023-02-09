@@ -26,5 +26,5 @@ cd ./common && npm install && cd -
 echo "INSTALL REST"
 cd ./rest && npm install && cd -
 
-echo "INSTALL server"
+echo "INSTALL SERVER"
 cd ./server && npm install && cd -

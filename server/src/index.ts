@@ -1,3 +1,5 @@
+export type { IResult as IUAParserResult } from 'ua-parser-js';
+
 export * from '@interfaces';
 export * from '@enums';
 
