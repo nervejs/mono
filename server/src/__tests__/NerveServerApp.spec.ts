@@ -16,10 +16,12 @@ const fetchUrl = async (url: string): Promise<{err: Error & { code?: string }}> 
 
 describe('App', () => {
 	it('run', async () => {
+		const port = 4040;
 		const app = new TestServerApp({
 			workDir: __dirname,
+			http: { port },
 		});
-		const url = `http://127.0.0.1:${app.config.http.port}`;
+		const url = `http://127.0.0.1:${port}`;
 
 		await app.init();
 		void app.run();

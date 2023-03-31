@@ -17,6 +17,6 @@ export interface INerveCommonTemplateVars {
 	isServerRendering: boolean;
 	httpTransport: INerveHttpTransport;
 	activeUser: INerveActiveUserData;
-
+	fetchedData: unknown;
 	logInfo(message: string): void;
 }

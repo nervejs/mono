@@ -16,15 +16,19 @@ import { INerveServerConfig } from '@interfaces';
 
 import { INerveServerAppOptions } from './types';
 
+const DEFAULT_HTTP_HOST = '0.0.0.0';
+const DEFAULT_HTTP_PORT = 3000;
+
 @Logger({ prefix: 'App' })
 export class NerveServerApp extends NerveServerObject {
 
 	protected workerIndex: number;
 
 	public config: INerveServerConfig = {
+		isLocalServer: false,
 		http: {
-			host: '0.0.0.0',
-			port: 3000,
+			host: null,
+			port: null,
 		},
 		paths: {
 			templates: null,
@@ -149,11 +153,9 @@ export class NerveServerApp extends NerveServerObject {
 	}
 
 	protected initHttpServer() {
-		const { http: { host, port } } = this.config;
-
 		this.httpServer = new NerveServerHTTPServer({
-			host,
-			port,
+			host: this.config.http.host || this.options.http?.host || DEFAULT_HTTP_HOST,
+			port: this.config.http.port || this.options.http?.port || DEFAULT_HTTP_PORT,
 		});
 		this.httpServer.initMiddlewares();
 	}
@@ -198,7 +200,9 @@ export class NerveServerApp extends NerveServerObject {
 	}
 
 	protected async onConfigChange(oldConfig: INerveServerConfig, newConfig: INerveServerConfig) {
-		const isHttpConfigChanged = oldConfig.http.port !== newConfig.http.port || oldConfig.http.host !== newConfig.http.host;
+		const isHttpConfigHostChanged = oldConfig.http.host !== newConfig.http.host;
+		const isHttpConfigPortChanged = oldConfig.http.port !== newConfig.http.port && !isNaN(oldConfig.http.port) && !isNaN(newConfig.http.port);
+		const isHttpConfigChanged = isHttpConfigPortChanged || isHttpConfigHostChanged;
 
 		this.setLogLevel(this.config.logLevel);
 

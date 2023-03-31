@@ -11,6 +11,7 @@ export interface INerveServerRequestOptions {
 	req: NerveServerRequest;
 	requestId: string;
 	timeout?: number;
+	isIgnoreSourceHeaders?: boolean;
 	log?: {
 		url?: boolean;
 		request?: {

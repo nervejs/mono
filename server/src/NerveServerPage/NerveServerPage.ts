@@ -21,15 +21,19 @@ import {
 	INerveFooterTemplateVars,
 	INerveHeadTemplateVars,
 	INerveHttpTransport,
-	INerveTemplateRenderResult,
+	INerveSimpleTemplate,
+	INerveTemplate,
 } from '@interfaces';
 
 import {
 	INerveServerPageBeforeProcessingResult,
+	INerveServerPageIncludedTemplate,
+	INerveServerPageIncludedTemplatesMap,
 	INerveServerPageOptions,
 	INerveServerPageSendResponseParams,
-	INerveServerPageTemplateConfig,
 	INerveServerPageTemplatesConfigMap,
+	INerveServerPageTemplateVarsMap,
+	INerveServerPageTimings,
 } from './types';
 
 @Logger({ prefix: 'Page' })
@@ -42,6 +46,13 @@ export class NerveServerPage extends NerveServerObject {
 		head: null,
 		content: null,
 		footer: null,
+		fetchData: null,
+	};
+	protected includedTemplates: INerveServerPageIncludedTemplatesMap = {
+		head: null,
+		content: null,
+		footer: null,
+		fetchData: null,
 	};
 	protected httpStatus: ENerveHTTPStatus = null;
 	protected fetchedData: unknown = {};
@@ -52,10 +63,45 @@ export class NerveServerPage extends NerveServerObject {
 
 	protected processingResponseDuration = 1;
 
+	protected timings: INerveServerPageTimings = {
+		start: 0,
+		end: 0,
+		duration: 0,
+		initActiveUser: 0,
+		beforeProcessing: 0,
+		processing: 0,
+		templateVars: {
+			common: 0,
+			head: 0,
+			content: 0,
+			footer: 0,
+			all: 0,
+		},
+		postProcessedVarsAfterFetchData: 0,
+		includeTemplates: {
+			head: 0,
+			content: 0,
+			footer: 0,
+			fetchData: 0,
+		},
+		renderTemplates: {
+			head: 0,
+			content: 0,
+			footer: 0,
+			all: 0,
+		},
+		fetchData: 0,
+		sendResponse: 0,
+	};
+
+	protected renderResultExtra: unknown = null;
+
 	protected onResponseFinishHandler: () => void;
 
 	constructor(options: INerveServerPageOptions) {
 		super();
+
+		this.timings.start = Date.now();
 
 		this.options = options;
 		this.app = options.app;
@@ -64,6 +110,15 @@ export class NerveServerPage extends NerveServerObject {
 
 		this.onResponseFinishHandler = () => this.onResponseFinish();
 		this.options.res.on('finish', this.onResponseFinishHandler);
+	}
+
+	protected async initActiveUserWrapper() {
+		const startInitActiveUserTimestamp = Date.now();
+
+		await this.initActiveUser();
+
+		this.timings.initActiveUser = Date.now() - startInitActiveUserTimestamp;
+		this.logDebug(`Init active user: ${this.timings.initActiveUser}ms`);
 	}
 
 	protected async initActiveUser() {
@@ -113,6 +168,7 @@ export class NerveServerPage extends NerveServerObject {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async sendResponse(params: INerveServerPageSendResponseParams) {
+		const startTimeStamp = Date.now();
 		const {
 			content,
 			contentType,
@@ -124,6 +180,9 @@ export class NerveServerPage extends NerveServerObject {
 			'Content-Type': contentType || ENerveContentType.TEXT_HTML,
 		});
 		this.options.res.send(content);
+
+		this.timings.sendResponse = Date.now() - startTimeStamp;
+		this.logDebug(`Send Response ${this.timings.sendResponse}ms`);
 	}
 
 	protected redirect(location: string, status?: ENerveHTTPStatus) {
@@ -141,16 +200,111 @@ export class NerveServerPage extends NerveServerObject {
 		return ENerveLocale.EN_US;
 	}
 
+	protected async beforeProcessingWrapper() {
+		const startBeforeProcessingTimestamp = Date.now();
+
+		const result = await this.beforeProcessing();
+
+		this.timings.beforeProcessing = Date.now() - startBeforeProcessingTimestamp;
+		this.logDebug(`Before processing (isAbort=${String(result.isAbort)}): ${this.timings.beforeProcessing}ms`);
+
+		return result;
+	}
+
 	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async beforeProcessing(): Promise<INerveServerPageBeforeProcessingResult> {
 		return { isAbort: false };
 	}
 
+	protected includeTemplate(tmplKey: keyof INerveServerPageTemplatesConfigMap): INerveServerPageIncludedTemplate {
+		const startTimeStamp = Date.now();
+		const templatesDir = this.app.getTemplatesDir();
+		const tmpl = this.templates[tmplKey];
+		const templatePath = path.resolve(templatesDir, tmpl.path);
+
+		if (!this.options.app.config.render.isCacheEnabled) {
+			delete require.cache[require.resolve(templatePath)];
+		}
+
+		const result = {
+			path: templatePath,
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			module: require(templatePath) as INerveServerPageIncludedTemplate['module'],
+		};
+
+		this.timings.includeTemplates[tmplKey] = Date.now() - startTimeStamp;
+		this.logDebug(`Include template "${tmplKey}" (${templatePath}) ${this.timings.includeTemplates[tmplKey]}ms`);
+
+		return result;
+	}
+
+	protected isSimpleIncludedTemplate(tmpl: INerveTemplate | INerveSimpleTemplate): tmpl is INerveSimpleTemplate {
+		const module = tmpl as INerveTemplate;
+
+		return !Boolean(module.render || module.fetchData);
+	}
+
+	protected prepareTemplates() {
+		if (this.templates.head) {
+			this.includedTemplates.head = this.includeTemplate('head');
+		}
+		if (this.templates.content) {
+			this.includedTemplates.content = this.includeTemplate('content');
+		}
+		if (this.templates.footer) {
+			this.includedTemplates.footer = this.includeTemplate('footer');
+		}
+		if (this.templates.fetchData) {
+			this.includedTemplates.fetchData = this.includeTemplate('fetchData');
+		}
+	}
+
+	protected async getPostProcessedVarsAfterFetchDataWrapper(templateVarsMap: INerveServerPageTemplateVarsMap): Promise<INerveServerPageTemplateVarsMap> {
+		const startTimestamp = Date.now();
+
+		const result = await this.getPostProcessedVarsAfterFetchData(templateVarsMap);
+
+		this.timings.postProcessedVarsAfterFetchData = Date.now() - startTimestamp;
+		this.logDebug(`Post processed vars after fetch data ${this.timings.postProcessedVarsAfterFetchData}ms`);
+
+		return result;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/require-await
+	protected async getPostProcessedVarsAfterFetchData(templateVarsMap: INerveServerPageTemplateVarsMap): Promise<INerveServerPageTemplateVarsMap> {
+		const {
+			common,
+			head,
+			content,
+			footer,
+		} = templateVarsMap;
+		const fetchedData = this.fetchedData;
+
+		return {
+			common: { ...common, fetchedData },
+			head: { ...head, fetchedData },
+			content: { ...content, fetchedData },
+			footer: { ...footer, fetchedData },
+		};
+	}
+
+	protected async processingWrapper() {
+		const startProcessingTimestamp = Date.now();
+
+		await this.processing();
+
+		this.timings.processing = Date.now() - startProcessingTimestamp;
+		this.logDebug(`Processing ${this.timings.processing}ms`);
+	}
+
 	protected async processing() {
 		try {
-			this.fetchedData = await this.fetchData();
+			const templateVarsMap = await this.getTemplateVarsMap();
 
-			const content = await this.getResponse();
+			this.prepareTemplates();
+			await this.fetchDataWrapper(templateVarsMap);
+			const resultTemplateVarsMap = await this.getPostProcessedVarsAfterFetchDataWrapper(templateVarsMap);
+			const content = await this.getResponse(resultTemplateVarsMap);
 
 			await this.sendResponse({
 				content,
@@ -191,30 +345,29 @@ export class NerveServerPage extends NerveServerObject {
 	}
 
 	protected onResponseFinish() {
+		this.timings.end = Date.now();
+		this.timings.duration = this.timings.end - this.timings.start;
+
 		this.options.res.off('finish', this.onResponseFinishHandler);
 
 		this.logInfo(`Finish response [status=${this.options.res.statusCode}]`);
 	}
 
 	async run() {
-		const startInitActiveUserTimestamp = Date.now();
+		if (this.app.config.isLocalServer) {
+			await this.app.localesManager.init();
+			await this.app.staticManager.init();
+		}
 
-		await this.initActiveUser();
-		this.logDebug(`Init active user: ${Date.now() - startInitActiveUserTimestamp}ms`);
+		await this.initActiveUserWrapper();
 
-		const startBeforeProcessingTimestamp = Date.now();
-		const { isAbort } = await this.beforeProcessing();
-
-		this.logDebug(`Before processing (isAbort=${String(isAbort)}): ${Date.now() - startBeforeProcessingTimestamp}ms`);
+		const { isAbort } = await this.beforeProcessingWrapper();
 
 		if (isAbort) {
 			this.logDebug(`Processing skipped`);
 		} else {
-			const startProcessingTimestamp = Date.now();
-
 			try {
-				await this.processing();
-				this.logDebug(`Processing ${Date.now() - startProcessingTimestamp}ms`);
+				await this.processingWrapper();
 			} catch (err) {
 				this.errorLog('Failed processing page', err as Error);
 
@@ -226,25 +379,43 @@ export class NerveServerPage extends NerveServerObject {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async fetchData(): Promise<unknown> {
+	protected async fetchDataWrapper(templateVarsMap: INerveServerPageTemplateVarsMap) {
+		const startFetchDataTimeStamp = Date.now();
+
+		this.fetchedData = await this.fetchData(templateVarsMap);
+
+		this.timings.fetchData = Date.now() - startFetchDataTimeStamp;
+		this.logDebug(`Fetch data: ${this.timings.fetchData} ms`);
+	}
+
+	protected async fetchData(templateVarsMap: INerveServerPageTemplateVarsMap) {
+		if (this.includedTemplates.fetchData && !this.isSimpleIncludedTemplate(this.includedTemplates.fetchData.module)) {
+			const { common, content } = templateVarsMap;
+			const { fetchData } = this.includedTemplates.fetchData.module;
+
+			if (typeof fetchData === 'function') {
+				return fetchData({ ...common, ...content });
+			}
+		}
+
 		return {};
 	}
 
-	async getResponse() {
+	protected async getTemplateVarsMap(): Promise<INerveServerPageTemplateVarsMap> {
 		const startTimestamp = Date.now();
 
 		const [
-			commonVars,
-			headVars,
-			footerVars,
-			contentVars,
+			common,
+			head,
+			footer,
+			content,
 		] = await Promise.all([
 			(async () => {
 				const startGetVarsTimeStamp = Date.now();
 				const vars = await this.getCommonVars();
 
-				this.logDebug(`Get COMMON vars: ${Date.now() - startGetVarsTimeStamp} ms`);
+				this.timings.templateVars.common = Date.now() - startGetVarsTimeStamp;
+				this.logDebug(`Get COMMON vars: ${this.timings.templateVars.common} ms`);
 
 				return vars;
 			})(),
@@ -253,7 +424,8 @@ export class NerveServerPage extends NerveServerObject {
 				const startGetVarsTimeStamp = Date.now();
 				const vars = await this.getHeadVars();
 
-				this.logDebug(`Get HEAD vars: ${Date.now() - startGetVarsTimeStamp} ms`);
+				this.timings.templateVars.head = Date.now() - startGetVarsTimeStamp;
+				this.logDebug(`Get HEAD vars: ${this.timings.templateVars.head} ms`);
 
 				return vars;
 			})(),
@@ -262,7 +434,8 @@ export class NerveServerPage extends NerveServerObject {
 				const startGetVarsTimeStamp = Date.now();
 				const vars = await this.getFooterVars();
 
-				this.logDebug(`Get FOOTER vars: ${Date.now() - startGetVarsTimeStamp} ms`);
+				this.timings.templateVars.footer = Date.now() - startGetVarsTimeStamp;
+				this.logDebug(`Get FOOTER vars: ${this.timings.templateVars.footer} ms`);
 
 				return vars;
 			})(),
@@ -271,27 +444,45 @@ export class NerveServerPage extends NerveServerObject {
 				const startGetVarsTimeStamp = Date.now();
 				const vars = await this.getContentVars();
 
-				this.logDebug(`Get CONTENT vars: ${Date.now() - startGetVarsTimeStamp} ms`);
+				this.timings.templateVars.content = Date.now() - startGetVarsTimeStamp;
+				this.logDebug(`Get CONTENT vars: ${this.timings.templateVars.content} ms`);
 
 				return vars;
 			})(),
 		]);
 
-		this.logDebug(`Get all template vars: ${Date.now() - startTimestamp} ms`);
+		this.timings.templateVars.all = Date.now() - startTimestamp;
+		this.logDebug(`Get all template vars: ${this.timings.templateVars.all} ms`);
 
+		return {
+			common,
+			head,
+			content,
+			footer,
+		};
+	}
+
+	protected async getResponse(templateVarsMap: INerveServerPageTemplateVarsMap): Promise<string> {
+		const startTimestamp = Date.now();
+		const {
+			common,
+			head,
+			content,
+			footer,
+		} = templateVarsMap;
 		let result = '';
 
 		if (this.isResponseAsJson()) {
-			result = JSON.stringify({ ...commonVars, ...contentVars });
+			result = JSON.stringify({ ...common, ...content });
 		} else {
 			const [
 				headHTML,
 				footerHTML,
 				contentHTML = '',
 			] = await Promise.all([
-				this.renderHead({ ...commonVars, ...headVars }),
-				this.renderFooter({ ...commonVars, ...footerVars }),
-				this.renderContent({ ...commonVars, ...contentVars }),
+				this.renderHead({ ...common, ...head }),
+				this.renderFooter({ ...common, ...footer }),
+				this.renderContent({ ...common, ...content }),
 			]);
 
 			result = headHTML + contentHTML + footerHTML;
@@ -320,6 +511,7 @@ export class NerveServerPage extends NerveServerObject {
 			isServerRendering: this.options.app.config.render.isServerEnabled,
 			httpTransport: this.getHttpTransport(),
 			activeUser: this.activeUser.data,
+			fetchedData: this.fetchedData,
 			logInfo: (message: string) => this.logInfo(message),
 		};
 	}
@@ -340,77 +532,65 @@ export class NerveServerPage extends NerveServerObject {
 	}
 
 	async renderHead(vars: INerveCommonTemplateVars & INerveHeadTemplateVars) {
-		const startTimestamp = Date.now();
 		let result = '';
 
-		if (this.templates.head) {
-			result = await this.renderTemplate(this.templates.head, vars);
+		this.logDebug('Render head template');
+
+		if (this.includedTemplates.head) {
+			result = await this.renderTemplate('head', vars);
 		} else {
 			this.logDebug('Empty head template');
 		}
-
-		this.logDebug(`Render head time: ${Date.now() - startTimestamp}ms`);
 
 		return result;
 	}
 
 	async renderContent(vars: INerveCommonTemplateVars & INerveContentTemplateVars) {
-		const startTimestamp = Date.now();
 		let result = '';
 
-		if (this.templates.content) {
-			result = await this.renderTemplate(this.templates.content, vars);
+		this.logDebug('Render content template');
+
+		if (this.includedTemplates.content) {
+			result = await this.renderTemplate('content', vars);
 		} else {
 			this.logDebug('Empty content template');
 		}
-
-		this.logDebug(`Render content time: ${Date.now() - startTimestamp}ms`);
 
 		return result;
 	}
 
 	async renderFooter(vars: INerveCommonTemplateVars & INerveFooterTemplateVars) {
-		const startTimestamp = Date.now();
 		let result = '';
 
-		if (this.templates.footer) {
-			result = await this.renderTemplate(this.templates.footer, vars);
+		this.logDebug('Render footer template');
+
+		if (this.includedTemplates.footer) {
+			result = await this.renderTemplate('footer', vars);
 		} else {
 			this.logDebug('Empty footer template');
 		}
 
-		this.logDebug(`Render footer time: ${Date.now() - startTimestamp}ms`);
-
 		return result;
 	}
 
-	async renderTemplate(tmpl: INerveServerPageTemplateConfig, vars: unknown) {
+	async renderTemplate(tmplKey: Exclude<keyof INerveServerPageIncludedTemplatesMap, 'fetchData'>, vars: unknown): Promise<string> {
 		const startTimestamp = Date.now();
-		const templatesDir = this.options.app.getTemplatesDir();
-		const templatePath = path.resolve(templatesDir, tmpl.path);
+		const tmpl = this.includedTemplates[tmplKey];
 		let result = '';
 
-		this.logDebug(`Start render template ${templatePath}`);
+		this.logDebug(`Start render template ${tmpl.path}`);
 
-		if (!this.options.app.config.render.isCacheEnabled) {
-			delete require.cache[require.resolve(templatePath)];
-		}
-
-		if (tmpl.isSimple) {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const templateFn = require(templatePath) as (vars: unknown) => string;
-
-			result = templateFn(vars);
+		if (this.isSimpleIncludedTemplate(tmpl.module)) {
+			result = tmpl.module(vars);
 		} else {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const { render: templateFn } = require(templatePath) as { render: (vars: unknown) => Promise<INerveTemplateRenderResult> };
+			const { html, extra } = await tmpl.module.render(vars);
 
-			const { html } = await templateFn(vars);
-
+			this.renderResultExtra = extra;
 			result = html;
 		}
 
-		this.logDebug(`Finish render template ${templatePath} ${Date.now() - startTimestamp}ms`);
+		this.timings.renderTemplates[tmplKey] = Date.now() - startTimestamp;
+		this.logDebug(`Finish render template "${tmplKey}" (${tmpl.path}) ${this.timings.renderTemplates[tmplKey]}ms`);
 
 		return result;
 	}
@@ -435,8 +615,17 @@ export class NerveServerPage extends NerveServerObject {
 		return this.options.res;
 	}
 
+	getFullProcessingTime() {
+		const { start, end } = this.timings;
+
+		return end - start;
+	}
+
 	getProcessingResponseDuration() {
-		return this.processingResponseDuration;
+		const { initActiveUser, fetchData } = this.timings;
+		const fullTime = this.getFullProcessingTime();
+
+		return fullTime - initActiveUser - fetchData;
 	}
 
 }

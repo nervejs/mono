@@ -15,8 +15,12 @@ export interface INerveHttpTransportRequestParams {
 	headers?: Record<string, string | number | boolean>;
 }
 
-export interface INerveHttpTransportError {
-	status: ENerveHTTPStatus,
-	response: string;
+export interface INerveHttpTransportResponse<R = unknown> {
+	status: ENerveHTTPStatus;
+	data: R;
 	headers: Record<string, string | number | boolean>;
+}
+
+export interface INerveHttpTransportError {
+	response: INerveHttpTransportResponse;
 }

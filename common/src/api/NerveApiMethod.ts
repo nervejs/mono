@@ -3,7 +3,7 @@ import { ENerveHTTPMethod } from '@enums';
 import { getURIParams } from '@utils';
 
 import { NerveApi } from './NerveApi';
-import { NerveApiError } from './NerveApiError';
+import { NerveRequestError } from './NerveRequestError';
 
 import { INerveApiRequest, INerveApiResponse, INerveHttpTransportError } from '@interfaces';
 
@@ -29,16 +29,15 @@ export class NerveApiMethod {
 				data,
 			});
 		} catch (err) {
-			const error = (err as { error: INerveHttpTransportError }).error;
-			// Log.errorRequest(error);
+			const error = err as INerveHttpTransportError;
 
-			throw new NerveApiError({
-				error,
+			throw new NerveRequestError({
+				response: error?.response,
 				request: {
 					url: params.url,
 					method: params.method,
 					data,
-					headers: error?.headers,
+					headers: error?.response?.headers,
 				},
 			});
 		}

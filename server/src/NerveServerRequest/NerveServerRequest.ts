@@ -80,11 +80,24 @@ export class NerveServerRequest extends NerveServerObject {
 	}
 
 	protected getRequestHeaders(): Record<string, string> {
-		const { headers } = this.params;
+		const { headers = {}, body, method } = this.params;
+		const { req, isIgnoreSourceHeaders } = this.options;
+		const hasBody = Boolean(body) && !['get', 'delete'].includes(String(method).toLocaleLowerCase());
+		const hasContentTypeHeader = Object.keys(headers)
+			.map((header) => header.toLowerCase())
+			.includes('content-type');
 
 		return {
+			...(isIgnoreSourceHeaders ? {} : req.headers),
 			...headers,
 			...this.upstream.extra.headers,
+			...(
+				hasContentTypeHeader || !hasBody
+					? {}
+					: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					}
+			),
 		};
 	}
 
@@ -138,6 +151,9 @@ export class NerveServerRequest extends NerveServerObject {
 			method,
 			body,
 		} = this.params;
+		const isContentTypeFormUrlEncoded = Object.keys(this.requestHeaders)
+			.map((header) => ({ key: header.toLowerCase(), value: this.requestHeaders[header] }))
+			.some(({ key, value }) => key === 'content-type' && value === 'application/x-www-form-urlencoded');
 		const controller = new AbortController();
 		let response: Response;
 		let isTimeout = false;
@@ -156,7 +172,13 @@ export class NerveServerRequest extends NerveServerObject {
 				{
 					headers: this.requestHeaders,
 					method,
-					body: body as BodyInit,
+					body: (
+						isContentTypeFormUrlEncoded && Boolean(body)
+							? Object.keys(body)
+								.map((key) => `${key}=${encodeURIComponent((body as Record<string, string>)[key])}`)
+								.join('&')
+							: body
+					) as BodyInit,
 					signal: controller.signal,
 				});
 		} catch (err) {
@@ -188,6 +210,8 @@ export class NerveServerRequest extends NerveServerObject {
 	}
 
 	async fetch<R = unknown>(params: INerveServerRequestParams): Promise<INerveServerRequestResponse<R>> {
+		let error: unknown = null;
+
 		this.params = params;
 
 		this.initUpstream();
@@ -195,11 +219,19 @@ export class NerveServerRequest extends NerveServerObject {
 
 		this.beforeFetch();
 
-		this.response = await this.send<R>();
+		try {
+			this.response = await this.send<R>();
+		} catch (err) {
+			error = err;
+		} finally {
+			this.afterFetch();
+		}
 
-		this.afterFetch();
-
-		return this.response as INerveServerRequestResponse<R>;
+		if (error) {
+			throw error;
+		} else {
+			return this.response as INerveServerRequestResponse<R>;
+		}
 	}
 
 	static async fetch<R = unknown>(options: INerveServerRequestOptions, params: INerveServerRequestParams) {

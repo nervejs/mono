@@ -1,4 +1,4 @@
-import { NerveApiError } from '@api';
+import { NerveRequestError } from '@api';
 
 import { INetworkStatus } from '@interfaces';
 
@@ -26,7 +26,7 @@ export const getNetworkStatusDone = (): INetworkStatus => {
 	};
 };
 
-export const getNetworkStatusFailed = (error: NerveApiError): INetworkStatus => {
+export const getNetworkStatusFailed = (error: NerveRequestError): INetworkStatus => {
 	return {
 		isFetching: false,
 		isFetched: false,

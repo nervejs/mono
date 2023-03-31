@@ -1,21 +1,23 @@
 import { EProcessMessageType } from './enums';
 
+import { NerveServerApp, INerveServerAppOptions } from '../NerveServerApp';
+
 export interface INerveServerRunnerProjectOptions {
 	pathToProject?: string;
-	appFileName?: string;
-	host?: string;
-	port?: number;
+	appRunFileName?: string;
+	prepareFileName?: string
+	http?: {
+		host?: string;
+		port?: number;
+	};
 	additionalOptions?: ({ flags: string; description: string })[];
 }
 
 export interface INerveServerRunnerCliOptions {
-	socket: string;
+	host: string;
 	port: number;
 	workers: number;
-	routes: string;
-	templates: string;
 	instanceId: string;
-	env: string;
 }
 
 export type TProcessMessage = {
@@ -27,4 +29,9 @@ export type TProcessMessage = {
 	type: EProcessMessageType.RUN,
 } | {
 	type: EProcessMessageType.KILL
+}
+
+export interface INerveServerAppRunModule {
+	createApp(options: Partial<INerveServerAppOptions>): NerveServerApp;
+	run(): void;
 }

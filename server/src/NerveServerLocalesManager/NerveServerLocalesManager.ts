@@ -9,7 +9,7 @@ import { Logger } from '@decorators';
 
 import { NerveServerObject } from '../NerveServerObject';
 
-import { TNerveServerLocalesList, INerveServerLocalesManagerOptions } from './types';
+import { INerveServerLocalesManagerOptions, TNerveServerLocalesList } from './types';
 
 @Logger({ prefix: 'LocalesManager' })
 export class NerveServerLocalesManager extends NerveServerObject {
@@ -17,6 +17,7 @@ export class NerveServerLocalesManager extends NerveServerObject {
 	protected options: INerveServerLocalesManagerOptions;
 	protected locales: TNerveServerLocalesList;
 	protected translations: { [key in ENerveLocale]: Record<string, string> } = {} as { [key in ENerveLocale]: Record<string, string> };
+	protected localesWithoutContext: { [key in ENerveLocale]: Record<string, string> } = {} as { [key in ENerveLocale]: Record<string, string> };
 
 	constructor(options: INerveServerLocalesManagerOptions) {
 		super();
@@ -30,18 +31,37 @@ export class NerveServerLocalesManager extends NerveServerObject {
 		await this.readLocales();
 		await this.readSourceLocales(source);
 
-		await Promise.all(
+		await Promise.allSettled(
 			list.map(async (locale) => this.readSourceLocales(locale)),
 		);
 	}
 
 	public getLocales(locale: ENerveLocale) {
-		return this.translations[locale] || {};
+		this.logDebug(`getLocales (${locale})`);
+
+		let locales = this.translations[locale];
+
+		if (!locales) {
+			const fallbackLocale = Object.keys(this.translations)[0] as ENerveLocale;
+
+			this.logDebug(`Locale "${locale}" is empty fallback to "${fallbackLocale}"`);
+			locales = this.translations[fallbackLocale];
+		}
+
+		if (!locales) {
+			this.logDebug(`All locales is empty`);
+
+			locales = {};
+		}
+
+		return locales;
 	}
 
 	protected async readSourceLocales(locale: ENerveLocale) {
 		const templatesDir = this.options.app.getTemplatesDir();
 		const fileName = path.resolve(templatesDir, 'locales.json');
+
+		this.logInfo(`Read source locales file ${fileName} for locale "${locale}"`);
 
 		try {
 			const content = await fs.readFile(fileName, { encoding: 'utf-8' });
@@ -52,7 +72,7 @@ export class NerveServerLocalesManager extends NerveServerObject {
 		}
 	}
 
-	protected walkLocales(locale: ENerveLocale, locales: Record<string, unknown>): Record<string, unknown> {
+	protected walkLocales(locale: ENerveLocale, locales: Record<string, unknown>, ctx?: string): Record<string, unknown> {
 		return Object.keys(locales).reduce(
 			(acc, key) => {
 				const item = locales[key];
@@ -60,8 +80,8 @@ export class NerveServerLocalesManager extends NerveServerObject {
 				return {
 					...acc,
 					[key]: typeof item === 'object'
-						? this.walkLocales(locale, item as Record<string, unknown>)
-						: this.getText(locale, item as string),
+						? this.walkLocales(locale, item as Record<string, unknown>, ctx || key)
+						: this.getText(locale, item as string, ctx),
 				};
 			},
 			{} as Record<string, unknown>,
@@ -75,29 +95,44 @@ export class NerveServerLocalesManager extends NerveServerObject {
 		} = this.options.app.config;
 		const localesDir = this.options.app.getLocalesDir();
 
-		const translations = await Promise.all(
-			list
-				.filter((locale) => locale !== source)
-				.map(async (locale) => (
-					new Promise<{ locale: ENerveLocale, translations: GetTextTranslations['translations'] }>(async (resolve, reject) => {
-						const fileName = path.resolve(localesDir, locale as string, localesFileName);
+		const translations = (
+			await Promise.all(
+				list
+					.filter((locale) => locale !== source)
+					.map(async (locale) => (
+						new Promise<{ locale: ENerveLocale, translations: GetTextTranslations['translations'] }>(async (resolve, reject) => {
+							const fileName = path.resolve(localesDir, locale as string, localesFileName);
 
-						try {
-							const content = await fs.readFile(fileName, { encoding: 'utf-8' });
-							const locales = gettextParser.po.parse(content);
+							this.logInfo(`Read translation file ${fileName}`);
 
-							resolve({
-								locale,
-								translations: locales.translations,
-							});
-						} catch (err) {
-							this.log.error('Failed read locales: ', err as Error);
+							try {
+								const content = await fs.readFile(fileName, { encoding: 'utf-8' });
+								const locales = gettextParser.po.parse(content);
 
-							reject(err);
-						}
-					})
-				)),
-		);
+								this.localesWithoutContext[locale] = {};
+								Object.keys(locales.translations)
+									.forEach((ctx) => {
+										Object.keys(locales.translations[ctx])
+											.forEach((msgId) => {
+												const item = locales.translations[ctx][msgId];
+
+												this.localesWithoutContext[locale][msgId] = item.msgstr[0];
+											});
+									});
+
+								resolve({
+									locale,
+									translations: locales.translations,
+								});
+							} catch (err) {
+								this.log.error('Failed read locales: ', err as Error);
+
+								resolve(null);
+							}
+						})
+					)),
+			)
+		).filter((item) => Boolean(item));
 
 		this.locales = translations.reduce(
 			(acc, translation) => ({
@@ -109,7 +144,17 @@ export class NerveServerLocalesManager extends NerveServerObject {
 	}
 
 	protected getText(locale: ENerveLocale, textId: string, ctx = '') {
-		return this.locales?.[locale]?.[ctx]?.[textId]?.msgstr?.[0] || textId;
+		if (textId.trim().length === 0) {
+			return '';
+		}
+
+		const translated = this.locales?.[locale]?.[ctx]?.[textId]?.msgstr?.[0] || this.getAlternateContextText(locale, textId);
+
+		return translated || textId;
+	}
+
+	protected getAlternateContextText(locale: ENerveLocale, textId: string) {
+		return this.localesWithoutContext?.[locale]?.[textId] || '';
 	}
 
 }

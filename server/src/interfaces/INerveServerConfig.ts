@@ -3,6 +3,7 @@ import { ENerveLocale, ENerveLogLevel } from '@enums';
 import { INerveServerUpstreamsConfigPoolItem } from './INerveServerUpstreamsConfigPoolItem';
 
 export interface INerveServerConfig {
+	isLocalServer: boolean;
 	http: {
 		host: string;
 		port: number;
