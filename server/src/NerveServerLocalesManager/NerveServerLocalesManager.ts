@@ -144,13 +144,19 @@ export class NerveServerLocalesManager extends NerveServerObject {
 	}
 
 	protected getText(locale: ENerveLocale, textId: string, ctx = '') {
+		const { source, isFallbackToSource } = this.options.app.config.locales;
+
 		if (textId.trim().length === 0) {
 			return '';
 		}
 
-		const translated = this.locales?.[locale]?.[ctx]?.[textId]?.msgstr?.[0] || this.getAlternateContextText(locale, textId);
+		let translated = this.locales?.[locale]?.[ctx]?.[textId]?.msgstr?.[0] || this.getAlternateContextText(locale, textId);
 
-		return translated || textId;
+		if (!translated && (isFallbackToSource || source === locale)) {
+			translated = textId;
+		}
+
+		return translated || '';
 	}
 
 	protected getAlternateContextText(locale: ENerveLocale, textId: string) {

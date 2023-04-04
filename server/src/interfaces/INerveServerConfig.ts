@@ -30,6 +30,7 @@ export interface INerveServerConfig {
 		source: ENerveLocale;
 		list: ENerveLocale[];
 		isEnabled: boolean;
+		isFallbackToSource: boolean;
 	};
 	render: {
 		isCacheEnabled: boolean;

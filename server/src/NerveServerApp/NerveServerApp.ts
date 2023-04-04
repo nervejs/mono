@@ -47,6 +47,7 @@ export class NerveServerApp extends NerveServerObject {
 			source: ENerveLocale.EN_US,
 			list: [],
 			isEnabled: false,
+			isFallbackToSource: true,
 		},
 		render: {
 			isCacheEnabled: true,
