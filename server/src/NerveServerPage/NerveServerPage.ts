@@ -354,28 +354,28 @@ export class NerveServerPage extends NerveServerObject {
 	}
 
 	async run() {
-		if (this.app.config.isLocalServer) {
-			await this.app.localesManager.init();
-			await this.app.staticManager.init();
-		}
-
-		await this.initActiveUserWrapper();
-
-		const { isAbort } = await this.beforeProcessingWrapper();
-
-		if (isAbort) {
-			this.logDebug(`Processing skipped`);
-		} else {
-			try {
-				await this.processingWrapper();
-			} catch (err) {
-				this.errorLog('Failed processing page', err as Error);
-
-				await this.sendResponse({
-					status: ENerveHTTPStatus.INTERNAL_ERROR,
-					content: '',
-				});
+		try {
+			if (this.app.config.isLocalServer) {
+				await this.app.localesManager.init();
+				await this.app.staticManager.init();
 			}
+
+			await this.initActiveUserWrapper();
+
+			const { isAbort } = await this.beforeProcessingWrapper();
+
+			if (isAbort) {
+				this.logDebug(`Processing skipped`);
+			} else {
+				await this.processingWrapper();
+			}
+		} catch (err) {
+			this.errorLog('Failed processing page', err as Error);
+
+			await this.sendResponse({
+				status: ENerveHTTPStatus.INTERNAL_ERROR,
+				content: '',
+			});
 		}
 	}
 
