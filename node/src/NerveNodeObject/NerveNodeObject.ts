@@ -2,7 +2,7 @@ import { getDefaultLogPrefix } from '@utils';
 
 import { NerveObject } from '@common/NerveObject';
 
-export class NerveServerObject extends NerveObject {
+export class NerveNodeObject extends NerveObject {
 
 	protected getLogPrefix() {
 		return getDefaultLogPrefix();

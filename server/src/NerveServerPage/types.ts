@@ -1,10 +1,11 @@
-import { Response } from 'express';
-
-import { ENerveContentType, ENerveHTTPStatus } from '@enums';
+import {
+	INerveNodeRouteHandlerBeforeProcessingResult,
+	INerveNodeRouteHandlerOptions,
+	INerveNodeRouteHandlerSendResponseParams,
+	INerveNodeRouteHandlerTimings,
+} from '@node/NerveNodeRouteHandler';
 
 import { NerveServerApp } from '../NerveServerApp';
-
-import { NerveServerRequest } from '@types';
 
 import {
 	INerveCommonTemplateVars,
@@ -15,17 +16,11 @@ import {
 	INerveTemplate,
 } from '@interfaces';
 
-export interface INerveServerPageOptions {
+export interface INerveServerPageOptions extends INerveNodeRouteHandlerOptions {
 	app: NerveServerApp;
-	req: NerveServerRequest;
-	res: Response;
 }
 
-export interface INerveServerPageSendResponseParams {
-	content: string;
-	contentType?: ENerveContentType;
-	status?: ENerveHTTPStatus;
-}
+export interface INerveServerPageSendResponseParams extends INerveNodeRouteHandlerSendResponseParams {}
 
 export interface INerveServerPageTemplateConfig {
 	path: string;
@@ -51,9 +46,7 @@ export interface INerveServerPageIncludedTemplatesMap {
 	fetchData?: INerveServerPageIncludedTemplate;
 }
 
-export interface INerveServerPageBeforeProcessingResult {
-	isAbort: boolean;
-}
+export interface INerveServerPageBeforeProcessingResult extends INerveNodeRouteHandlerBeforeProcessingResult {}
 
 export interface INerveServerPageHeadTemplateVars extends Omit<INerveHeadTemplateVars, keyof INerveCommonTemplateVars> {}
 
@@ -68,13 +61,7 @@ export interface INerveServerPageTemplateVarsMap {
 	footer: INerveServerPageFooterTemplateVars;
 }
 
-export interface INerveServerPageTimings {
-	start: number;
-	end: number;
-	duration: number;
-	initActiveUser: number;
-	beforeProcessing: number;
-	processing: number;
+export interface INerveServerPageTimings extends INerveNodeRouteHandlerTimings {
 	templateVars: {
 		common: number;
 		head: number;
@@ -96,5 +83,4 @@ export interface INerveServerPageTimings {
 		all: number;
 	};
 	fetchData: number;
-	sendResponse: number;
 }

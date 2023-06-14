@@ -7,12 +7,12 @@ import { ENerveLocale } from '@enums';
 
 import { Logger } from '@decorators';
 
-import { NerveServerObject } from '../NerveServerObject';
+import { NerveNodeObject } from '@node/NerveNodeObject';
 
 import { INerveServerLocalesManagerOptions, TNerveServerLocalesList } from './types';
 
 @Logger({ prefix: 'LocalesManager' })
-export class NerveServerLocalesManager extends NerveServerObject {
+export class NerveServerLocalesManager extends NerveNodeObject {
 
 	protected options: INerveServerLocalesManagerOptions;
 	protected locales: TNerveServerLocalesList;

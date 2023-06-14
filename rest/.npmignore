@@ -1,9 +1,10 @@
+/src
+
 node_modules
 coverage
 docs
 bin
 etc
-src
 typings
 webpack
 tests

@@ -11,9 +11,17 @@
 /common/dist
 /common/.eslintcache
 
+/node/node_modules
+/node/dist
+/node/.eslintcache
+
 /rest/node_modules
 /rest/dist
 /rest/.eslintcache
+
+/rest.bk/node_modules
+/rest.bk/dist
+/rest.bk/.eslintcache
 
 /server/node_modules
 /server/dist

@@ -1,1 +1,1 @@
-export * from '@common/decorators';
+export * from '@node/decorators';

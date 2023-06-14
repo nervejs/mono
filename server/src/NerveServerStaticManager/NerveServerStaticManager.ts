@@ -3,14 +3,14 @@ import * as path from 'path';
 
 import { Logger } from '@decorators';
 
-import { NerveServerObject } from '../NerveServerObject';
+import { NerveNodeObject } from '@node/NerveNodeObject';
 
 import { INerveStaticVersion, INerveStaticVersionItem } from '@interfaces';
 
 import { INerveServerStaticManagerOptions } from './types';
 
 @Logger({ prefix: 'StaticManager' })
-export class NerveServerStaticManager extends NerveServerObject {
+export class NerveServerStaticManager extends NerveNodeObject {
 
 	protected options: INerveServerStaticManagerOptions;
 	protected versions: INerveStaticVersion[] = [];

@@ -1,7 +1,3 @@
-export interface INerveServerAppOptions {
-	workDir: string;
-	http?: {
-		host?: string;
-		port?: number;
-	};
-}
+import { INerveNodeAppOptions } from '@node/NerveNodeApp';
+
+export interface INerveServerAppOptions extends INerveNodeAppOptions {}

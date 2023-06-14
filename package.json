@@ -16,7 +16,7 @@
 	"author": "denis.yarkeev@gmail.com",
 	"license": "MIT",
 	"devDependencies": {
-		"@nervejs/eslint-plugin": "^2.1.6",
+		"@nervejs/eslint-plugin": "^2.1.7",
 		"@types/jest": "^29.4.0",
 		"@types/node": "^18.11.18",
 		"husky": "^8.0.0",

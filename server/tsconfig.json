@@ -14,6 +14,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@common/*": [ "../common/src/*" ],
+			"@node/*": [ "../node/src/*" ],
 			"@api": [ "../common/src/api/index" ],
 			"@constants": [ "./src/constants/index" ],
 			"@constants/*": [ "./src/constants/*" ],

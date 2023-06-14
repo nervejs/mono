@@ -17,4 +17,8 @@ export class NerveObject {
 		debug: (message: string) => Log.debug(this.getLogText(message)),
 	};
 
+	getLogLevel() {
+		return Log.getLevel();
+	}
+
 }

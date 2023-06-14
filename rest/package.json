@@ -1,6 +1,6 @@
 {
 	"name": "@nervejs/rest",
-	"version": "0.0.1",
+	"version": "0.0.45",
 	"description": "",
 	"main": "dist/rest/src/index",
 	"typings": "dist/rest/src/index",
@@ -10,30 +10,35 @@
 		"tsc-alias": "../node_modules/.bin/tsc-alias",
 		"type-check": "npm run ts -- --noEmit",
 		"type-check:watch": "npm run type-check -- --watch",
+		"copy-config": "cp ./src/__tests__/nerverc.json ./dist/server/src/__tests__/nerverc.json",
 		"build": "npm run clean && npm run ts && npm run tsc-alias",
 		"dev": "./bin/dev.sh",
 		"test": "../node_modules/.bin/jest",
 		"eslint": "../node_modules/.bin/eslint 'src/**/*.{ts,tsx}' --cache",
-		"prepublishOnly": "npm run build && npm run eslint && npm test && bump"
+		"prepublishOnly": "npm run build && npm run eslint && bump"
 	},
 	"author": "denis.yarkeev@gmail.com",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/bcryptjs": "^2.4.2",
-		"@types/cookie-parser": "^1.4.2",
-		"@types/express": "^4.17.0",
-		"@types/express-fileupload": "^1.2.0",
-		"@types/jsonwebtoken": "^8.5.6",
-		"@types/request": "^2.48.1"
+		"@types/body-parser": "^1.19.2",
+		"@types/cookie-parser": "^1.4.3",
+		"@types/express": "^4.17.13",
+		"@types/gettext-parser": "^4.0.1",
+		"@types/node-fetch": "^2.6.2",
+		"@types/uuid": "^8.3.4"
 	},
 	"dependencies": {
-		"bcryptjs": "^2.4.3",
-		"cookie-parser": "^1.4.5",
+		"@types/ua-parser-js": "^0.7.36",
+		"balancer-round-robin": "^1.0.6",
+		"body-parser": "^1.20.1",
+		"commander": "^9.5.0",
+		"cookie-parser": "^1.4.6",
 		"error-stack-parser": "^2.1.4",
-		"express": "^4.17.1",
-		"express-fileupload": "^1.2.1",
-		"jsonwebtoken": "^8.5.1",
-		"request": "^2.88.0",
-		"snake-case": "^3.0.4"
+		"express": "^4.18.1",
+		"gettext-parser": "^5.1.2",
+		"node-fetch": "^2.6.7",
+		"ua-parser-js": "^1.0.33",
+		"uuid": "^9.0.0",
+		"yup": "^1.2.0"
 	}
 }

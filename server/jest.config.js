@@ -13,6 +13,7 @@ module.exports = {
 	},
 	moduleNameMapper: {
 		'^@common(.*)$': '<rootDir>/../common/src$1',
+		'^@node(.*)$': '<rootDir>/../node/src$1',
 		'^@constants(.*)$': '<rootDir>/src/constants$1',
 		'^@enums(.*)$': '<rootDir>/src/enums$1',
 		'^@interfaces(.*)$': '<rootDir>/src/interfaces$1',
