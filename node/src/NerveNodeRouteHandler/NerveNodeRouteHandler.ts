@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import { ENerveContentType, ENerveHTTPStatus, ENerveLocale } from '@enums';
 
 import { getDefaultLogPrefix } from '@utils';
@@ -23,7 +21,7 @@ export class NerveNodeRouteHandler extends NerveNodeObject {
 	protected httpStatus: ENerveHTTPStatus = null;
 	protected fetchedData: unknown = {};
 	protected activeUser: NerveNodeActiveUser;
-	protected requestId = uuid();
+	protected requestId: string;
 	protected defaultContentType = ENerveContentType.TEXT_HTML;
 
 	protected processingResponseDuration = 1;
@@ -49,6 +47,7 @@ export class NerveNodeRouteHandler extends NerveNodeObject {
 
 		this.options = options;
 		this.app = options.app;
+		this.requestId = this.options.req.requestId;
 
 		this.onResponseFinishHandler = () => this.onResponseFinish();
 		this.options.res.on('finish', this.onResponseFinishHandler);

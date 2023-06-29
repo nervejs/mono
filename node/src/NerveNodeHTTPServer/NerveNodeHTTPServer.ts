@@ -2,12 +2,15 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import http from 'http';
+import { v4 as uuid } from 'uuid';
 
 import { getDefaultLogPrefix } from '@utils';
 
 import { Logger } from '@decorators';
 
 import { NerveNodeObject } from '../NerveNodeObject';
+
+import { NerveNodeRequest } from '@types';
 
 import { INerveServerHTTPServerOptions } from './types';
 
@@ -66,15 +69,18 @@ export class NerveNodeHTTPServer extends NerveNodeObject {
 		this.express.use(cookieParser());
 		this.express.use(bodyParser.urlencoded({ extended: false }));
 
-		this.express.use((req, res, next) => {
+		this.express.use((req: NerveNodeRequest, res, next) => {
 			const method = req.method.toUpperCase();
 			const startTimestamp = Date.now();
+			const requestId = uuid();
 
-			this.logInfo(`Start ${method} ${req.url}`);
+			req.requestId = requestId;
+
+			this.logInfo(`[${requestId}] Start ${method} ${req.url}`);
 
 			res.on('finish', () => {
 				const duration = Date.now() - startTimestamp;
-				let log = `Finish ${method} ${req.url} ${res.statusCode} ${duration}ms`;
+				let log = `[${requestId}] Finish ${method} ${req.url} ${res.statusCode} ${duration}ms`;
 
 				if (res.statusCode >= 300 && res.statusCode <= 399) {
 					log += ` (location: ${String(res.get('location'))})`;

@@ -9,12 +9,13 @@ import {
 } from '@interfaces';
 
 export type NerveNodeRequest = Omit<Request, 'body' | 'cookies' | 'headers' | 'params' | 'query' | 'route'> &
-	INerveNodeRequestBody &
-	INerveNodeRequestCookies &
-	INerveNodeRequestHeaders &
-	INerveNodeRequestParams &
-	INerveNodeRequestQueryString & {
-		route: {
-			path: string;
-		};
-	}
+INerveNodeRequestBody &
+INerveNodeRequestCookies &
+INerveNodeRequestHeaders &
+INerveNodeRequestParams &
+INerveNodeRequestQueryString & {
+	requestId: string;
+	route: {
+		path: string;
+	};
+}
