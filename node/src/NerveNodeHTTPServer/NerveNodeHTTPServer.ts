@@ -80,7 +80,7 @@ export class NerveNodeHTTPServer extends NerveNodeObject {
 
 			res.on('finish', () => {
 				const duration = Date.now() - startTimestamp;
-				let log = `[${requestId}] Finish ${method} ${req.url} ${res.statusCode} ${duration}ms`;
+				let log = `[${requestId}] Finish ${method} ${req.url} [status=${res.statusCode}] [duration=${duration}ms]`;
 
 				if (res.statusCode >= 300 && res.statusCode <= 399) {
 					log += ` (location: ${String(res.get('location'))})`;
