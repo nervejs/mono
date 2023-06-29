@@ -117,7 +117,11 @@ export class NerveServerApp extends NerveNodeApp {
 			app: this,
 		});
 
-		await this.localesManager.init();
+		if (this.getLocalesDir()) {
+			await this.localesManager.init();
+		} else {
+			this.log.info(`Locales dir is empty on config. Skip initialize LocalesManager`);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
