@@ -23,6 +23,7 @@ export abstract class NerveNodeApp extends NerveNodeObject {
 		http: {
 			host: null,
 			port: null,
+			maxBodySize: '100kb',
 		},
 		logLevel: ENerveLogLevel.ERROR,
 	};
@@ -111,7 +112,8 @@ export abstract class NerveNodeApp extends NerveNodeObject {
 	protected async onConfigChange(oldConfig: INerveNodeConfig, newConfig: INerveNodeConfig) {
 		const isHttpConfigHostChanged = oldConfig.http.host !== newConfig.http.host;
 		const isHttpConfigPortChanged = oldConfig.http.port !== newConfig.http.port && !isNaN(oldConfig.http.port) && !isNaN(newConfig.http.port);
-		const isHttpConfigChanged = isHttpConfigPortChanged || isHttpConfigHostChanged;
+		const isHttpConfigMaxBodySizeChanged = oldConfig.http.maxBodySize !== newConfig.http.maxBodySize;
+		const isHttpConfigChanged = isHttpConfigPortChanged || isHttpConfigHostChanged || isHttpConfigMaxBodySizeChanged;
 
 		this.setLogLevel(this.config.logLevel);
 

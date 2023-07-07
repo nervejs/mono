@@ -1,6 +1,6 @@
 {
 	"name": "@nervejs/rest",
-	"version": "0.0.45",
+	"version": "0.1.5",
 	"description": "",
 	"main": "dist/rest/src/index",
 	"typings": "dist/rest/src/index",

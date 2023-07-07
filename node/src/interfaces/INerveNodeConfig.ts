@@ -5,6 +5,7 @@ export interface INerveNodeConfig {
 	http: {
 		host: string;
 		port: number;
+		maxBodySize: number | string;
 	};
 	logLevel: ENerveLogLevel;
 }

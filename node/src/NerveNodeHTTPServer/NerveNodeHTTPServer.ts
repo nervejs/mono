@@ -21,13 +21,15 @@ export class NerveNodeHTTPServer extends NerveNodeObject {
 	protected server: http.Server;
 	protected host = '0.0.0.0';
 	protected port: number;
+	protected maxBodySize: string | number;
 
 	constructor(options: INerveServerHTTPServerOptions) {
 		super();
-		const { host, port } = options;
+		const { host, port, maxBodySize } = options;
 
 		this.host = host;
 		this.port = port;
+		this.maxBodySize = maxBodySize;
 
 		this.express.enable('trust proxy');
 		this.express.enable('case sensitive routing');
@@ -67,7 +69,10 @@ export class NerveNodeHTTPServer extends NerveNodeObject {
 
 	initMiddlewares() {
 		this.express.use(cookieParser());
-		this.express.use(bodyParser.urlencoded({ extended: false }));
+		this.express.use(bodyParser.urlencoded({
+			extended: false,
+			limit: this.maxBodySize,
+		}));
 
 		this.express.use((req: NerveNodeRequest, res, next) => {
 			const method = req.method.toUpperCase();

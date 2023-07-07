@@ -25,6 +25,7 @@ export class NerveRestApp extends NerveNodeApp {
 		this.httpServer = new NerveRestHTTPServer({
 			host: this.config.http.host || this.options.http?.host || DEFAULT_HTTP_HOST,
 			port: this.config.http.port || this.options.http?.port || DEFAULT_HTTP_PORT,
+			maxBodySize: this.config.http.maxBodySize,
 		});
 		this.httpServer.initMiddlewares();
 	}
