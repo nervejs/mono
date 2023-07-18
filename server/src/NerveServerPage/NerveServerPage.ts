@@ -1,18 +1,16 @@
 import * as path from 'path';
 // eslint-disable-next-line import/named
 import { IResult as IUAParserResult, UAParser } from 'ua-parser-js';
-import { v4 as uuid } from 'uuid';
 
 import { ENerveContentType, ENerveHTTPStatus, ENerveLocale } from '@enums';
 
-import { getDefaultLogPrefix } from '@utils';
-
 import { Logger } from '@decorators';
+
+import { NerveNodeRouteHandler } from '@node/NerveNodeRouteHandler';
 
 import { NerveHttpTransport } from '../NerveHttpTransport';
 import { NerveServerActiveUser } from '../NerveServerActiveUser';
 import { NerveServerApp } from '../NerveServerApp';
-import { NerveServerObject } from '../NerveServerObject';
 
 import {
 	INerveClientConfig,
@@ -37,7 +35,7 @@ import {
 } from './types';
 
 @Logger({ prefix: 'Page' })
-export class NerveServerPage extends NerveServerObject {
+export class NerveServerPage extends NerveNodeRouteHandler {
 
 	protected options: INerveServerPageOptions;
 
@@ -54,22 +52,14 @@ export class NerveServerPage extends NerveServerObject {
 		footer: null,
 		fetchData: null,
 	};
-	protected httpStatus: ENerveHTTPStatus = null;
 	protected fetchedData: unknown = {};
 	protected activeUser: NerveServerActiveUser;
-	protected requestId = uuid();
+	protected defaultContentType = ENerveContentType.TEXT_HTML;
 
 	protected uaParserResult: IUAParserResult = null;
 
-	protected processingResponseDuration = 1;
-
 	protected timings: INerveServerPageTimings = {
-		start: 0,
-		end: 0,
-		duration: 0,
-		initActiveUser: 0,
-		beforeProcessing: 0,
-		processing: 0,
+		...this.timings,
 		templateVars: {
 			common: 0,
 			head: 0,
@@ -91,34 +81,14 @@ export class NerveServerPage extends NerveServerObject {
 			all: 0,
 		},
 		fetchData: 0,
-		sendResponse: 0,
 	};
 
 	protected renderResultExtra: unknown = null;
 
-	protected onResponseFinishHandler: () => void;
-
 	constructor(options: INerveServerPageOptions) {
-		super();
-
-		this.timings.start = Date.now();
-
-		this.options = options;
-		this.app = options.app;
+		super(options);
 
 		this.parseUserAgent();
-
-		this.onResponseFinishHandler = () => this.onResponseFinish();
-		this.options.res.on('finish', this.onResponseFinishHandler);
-	}
-
-	protected async initActiveUserWrapper() {
-		const startInitActiveUserTimestamp = Date.now();
-
-		await this.initActiveUser();
-
-		this.timings.initActiveUser = Date.now() - startInitActiveUserTimestamp;
-		this.logDebug(`Init active user: ${this.timings.initActiveUser}ms`);
 	}
 
 	protected async initActiveUser() {
@@ -142,54 +112,14 @@ export class NerveServerPage extends NerveServerObject {
 		return NerveHttpTransport;
 	}
 
-	protected setHeaders(headers: Record<string, string>) {
-		Object.entries(headers).forEach(
-			([key, value]) => this.options.res.header(key, value),
-		);
-	}
-
-	protected setHttpStatus(status: ENerveHTTPStatus) {
-		this.options.res.status(status);
-		this.httpStatus = status;
-	}
-
-	protected getLogPrefix() {
-		const routePath = this.options.req.route.path;
-		const user = this.activeUser && this.activeUser.getUniqIdentifier();
-
-		return `${getDefaultLogPrefix({ requestId: this.requestId })} [${routePath}] [${user}]`;
-	}
-
 	protected parseUserAgent() {
 		const parser = new UAParser(this.getUserAgent());
 
 		this.uaParserResult = parser.getResult();
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async sendResponse(params: INerveServerPageSendResponseParams) {
-		const startTimeStamp = Date.now();
-		const {
-			content,
-			contentType,
-			status,
-		} = params;
-
-		this.setHttpStatus(status || ENerveHTTPStatus.OK);
-		this.setHeaders({
-			'Content-Type': contentType || ENerveContentType.TEXT_HTML,
-		});
-		this.options.res.send(content);
-
-		this.timings.sendResponse = Date.now() - startTimeStamp;
-		this.logDebug(`Send Response ${this.timings.sendResponse}ms`);
-	}
-
-	protected redirect(location: string, status?: ENerveHTTPStatus) {
-		this.setHttpStatus(status || ENerveHTTPStatus.FOUND);
-		this.setHeaders({ location });
-
-		this.options.res.send('');
+		return super.sendResponse(params);
 	}
 
 	protected getLocalesVars() {
@@ -198,22 +128,6 @@ export class NerveServerPage extends NerveServerObject {
 
 	protected getCurrentLocale(): ENerveLocale {
 		return ENerveLocale.EN_US;
-	}
-
-	protected async beforeProcessingWrapper() {
-		const startBeforeProcessingTimestamp = Date.now();
-
-		const result = await this.beforeProcessing();
-
-		this.timings.beforeProcessing = Date.now() - startBeforeProcessingTimestamp;
-		this.logDebug(`Before processing (isAbort=${String(result.isAbort)}): ${this.timings.beforeProcessing}ms`);
-
-		return result;
-	}
-
-	// eslint-disable-next-line @typescript-eslint/require-await
-	protected async beforeProcessing(): Promise<INerveServerPageBeforeProcessingResult> {
-		return { isAbort: false };
 	}
 
 	protected includeTemplate(tmplKey: keyof INerveServerPageTemplatesConfigMap): INerveServerPageIncludedTemplate {
@@ -288,13 +202,9 @@ export class NerveServerPage extends NerveServerObject {
 		};
 	}
 
-	protected async processingWrapper() {
-		const startProcessingTimestamp = Date.now();
-
-		await this.processing();
-
-		this.timings.processing = Date.now() - startProcessingTimestamp;
-		this.logDebug(`Processing ${this.timings.processing}ms`);
+	// eslint-disable-next-line @typescript-eslint/require-await
+	protected async beforeProcessing(): Promise<INerveServerPageBeforeProcessingResult> {
+		return { isAbort: false };
 	}
 
 	protected async processing() {
@@ -304,7 +214,7 @@ export class NerveServerPage extends NerveServerObject {
 			this.prepareTemplates();
 			await this.fetchDataWrapper(templateVarsMap);
 			const resultTemplateVarsMap = await this.getPostProcessedVarsAfterFetchDataWrapper(templateVarsMap);
-			const content = await this.getResponse(resultTemplateVarsMap);
+			const content = await this.getResponseByTemplateVars(resultTemplateVarsMap);
 
 			await this.sendResponse({
 				content,
@@ -344,39 +254,21 @@ export class NerveServerPage extends NerveServerObject {
 		return false;
 	}
 
-	protected onResponseFinish() {
-		this.timings.end = Date.now();
-		this.timings.duration = this.timings.end - this.timings.start;
-
-		this.options.res.off('finish', this.onResponseFinishHandler);
-
-		this.logInfo(`Finish response [status=${this.options.res.statusCode}]`);
-	}
-
 	async run() {
-		try {
-			if (this.app.config.isLocalServer) {
+		if (this.app.config.isLocalServer) {
+			try {
 				await this.app.localesManager.init();
+			} catch (err) {
+				this.errorLog('Failed init locales manager', err as Error);
+			}
+			try {
 				await this.app.staticManager.init();
+			} catch (err) {
+				this.errorLog('Failed init static manager', err as Error);
 			}
-
-			await this.initActiveUserWrapper();
-
-			const { isAbort } = await this.beforeProcessingWrapper();
-
-			if (isAbort) {
-				this.logDebug(`Processing skipped`);
-			} else {
-				await this.processingWrapper();
-			}
-		} catch (err) {
-			this.errorLog('Failed processing page', err as Error);
-
-			await this.sendResponse({
-				status: ENerveHTTPStatus.INTERNAL_ERROR,
-				content: '',
-			});
 		}
+
+		await super.run();
 	}
 
 	protected async fetchDataWrapper(templateVarsMap: INerveServerPageTemplateVarsMap) {
@@ -462,7 +354,7 @@ export class NerveServerPage extends NerveServerObject {
 		};
 	}
 
-	protected async getResponse(templateVarsMap: INerveServerPageTemplateVarsMap): Promise<string> {
+	protected async getResponseByTemplateVars(templateVarsMap: INerveServerPageTemplateVarsMap): Promise<string> {
 		const startTimestamp = Date.now();
 		const {
 			common,
@@ -595,30 +487,8 @@ export class NerveServerPage extends NerveServerObject {
 		return result;
 	}
 
-	getRequestUrl(): string {
-		return this.options.req.url;
-	}
-
-	getUserAgent() {
-		return this.options.req.headers['user-agent'] || '';
-	}
-
 	getUaParserResult() {
 		return this.uaParserResult;
-	}
-
-	getReq() {
-		return this.options.req;
-	}
-
-	getRes() {
-		return this.options.res;
-	}
-
-	getFullProcessingTime() {
-		const { start, end } = this.timings;
-
-		return end - start;
 	}
 
 	getProcessingResponseDuration() {

@@ -2,14 +2,14 @@ import { Upstream, UpstreamList } from 'balancer-round-robin';
 
 import { Logger } from '@decorators';
 
-import { NerveServerObject } from '../NerveServerObject';
+import { NerveNodeObject } from '@node/NerveNodeObject';
 
 import { INerveServerUpstreamsConfigPoolItem, INerveServerUpstreamsConfigPoolItemExtra } from '@interfaces';
 
 import { INerveServerUpstreamBalancerOptions } from './types';
 
 @Logger({ prefix: 'UpstreamBalancer' })
-export class NerveServerUpstreamBalancer extends NerveServerObject {
+export class NerveServerUpstreamBalancer extends NerveNodeObject {
 
 	protected options: INerveServerUpstreamBalancerOptions;
 	protected upstreams: { [key: string]: { upstream?: Upstream; pool?: UpstreamList } } = {};

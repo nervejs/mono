@@ -1,6 +1,6 @@
 {
 	"name": "@nervejs/server",
-	"version": "0.0.29",
+	"version": "0.1.5",
 	"description": "",
 	"main": "dist/server/src/index",
 	"typings": "dist/server/src/index",

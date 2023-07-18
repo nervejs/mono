@@ -1,1 +1,1 @@
-export * from '@common/enums';
+export * from '@node/enums';

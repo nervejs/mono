@@ -1,3 +1,1 @@
-export * from '@common/utils';
-
-export * from './getDefaultLogPrefix';
+export * from '@node/utils';

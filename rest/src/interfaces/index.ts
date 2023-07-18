@@ -1,11 +1,7 @@
-export * from '@common/interfaces';
+export * from '@node/interfaces';
 
-export * from './INerveRestAuthOptions';
-export * from './INerveRestControllerBeforeActionResult';
+export * from './INerveRestConfig';
 export * from './INerveRestControllerErrorResult';
-export * from './INerveRestControllerOptions';
-export * from './INerveRestControllerRequestParams';
-export * from './INerveRestControllerRequestParamsScheme';
 export * from './INerveRestControllerResult';
-export * from './INerveRestRouteAction';
-export * from './INerveRestRouteModule';
+export * from './INerveRestRoute';
+export * from './INerveRestValidationError';

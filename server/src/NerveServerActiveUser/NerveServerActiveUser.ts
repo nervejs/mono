@@ -1,39 +1,16 @@
 import { Logger } from '@decorators';
 
-import { NerveServerApp } from '../NerveServerApp';
-import { NerveServerObject } from '../NerveServerObject';
+import { NerveNodeActiveUser } from '@node/NerveNodeActiveUser';
 
-import { INerveActiveUserData } from '@interfaces';
+import { NerveServerApp } from '../NerveServerApp';
 
 import { INerveServerActiveUserOptions } from './types';
 
 @Logger({ prefix: 'ActiveUser' })
-export class NerveServerActiveUser extends NerveServerObject {
+export class NerveServerActiveUser extends NerveNodeActiveUser {
 
 	protected options: INerveServerActiveUserOptions;
 
 	protected app: NerveServerApp;
-
-	data: INerveActiveUserData;
-
-	constructor(options: INerveServerActiveUserOptions) {
-		super();
-
-		this.options = options;
-		this.app = options.app;
-	}
-
-	getUniqIdentifier(): string {
-		return null;
-	}
-
-	isAuthorized() {
-		return this.data.isAuthorized;
-	}
-
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async init(): Promise<void> {
-		this.data = { isAuthorized: false };
-	}
 
 }

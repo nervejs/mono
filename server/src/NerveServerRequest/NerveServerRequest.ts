@@ -6,7 +6,7 @@ import { getDefaultLogPrefix } from '@utils';
 
 import { Logger } from '@decorators';
 
-import { NerveServerObject } from '../NerveServerObject';
+import { NerveNodeObject } from '@node/NerveNodeObject';
 
 import { INerveServerUpstreamsConfigPoolItemExtra } from '@interfaces';
 
@@ -17,7 +17,7 @@ import {
 } from './types';
 
 @Logger({ prefix: 'Request' })
-export class NerveServerRequest extends NerveServerObject {
+export class NerveServerRequest extends NerveNodeObject {
 
 	protected options: INerveServerRequestOptions;
 

@@ -3,12 +3,12 @@ import { ENerveHTTPMethod } from '@enums';
 import { NerveServerActiveUser } from '../NerveServerActiveUser';
 import { NerveServerApp } from '../NerveServerApp';
 
-import { NerveServerRequest } from '@types';
+import { NerveNodeRequest } from '@types';
 
 export interface INerveServerRequestOptions {
 	app: NerveServerApp;
 	activeUser: NerveServerActiveUser;
-	req: NerveServerRequest;
+	req: NerveNodeRequest;
 	requestId: string;
 	timeout?: number;
 	isIgnoreSourceHeaders?: boolean;

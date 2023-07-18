@@ -1,13 +1,7 @@
-import { Response } from 'express';
+import { INerveNodeActiveUserOptions } from '@node/NerveNodeActiveUser';
 
 import { NerveServerApp } from '../NerveServerApp';
 
-import { NerveServerRequest } from '@types';
-
-export interface INerveServerActiveUserOptions {
+export interface INerveServerActiveUserOptions extends INerveNodeActiveUserOptions {
 	app: NerveServerApp;
-	req: NerveServerRequest;
-	res: Response;
-
-	requestId: string;
 }

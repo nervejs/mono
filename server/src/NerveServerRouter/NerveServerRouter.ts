@@ -1,32 +1,26 @@
 import { Request, Response } from 'express';
 import * as path from 'path';
 
-import { ENerveHTTPMethod } from '@enums';
-
 import { Logger } from '@decorators';
 
-import { NerveServerHTTPServer } from '../NerveServerHTTPServer';
-import { NerveServerObject } from '../NerveServerObject';
-import { NerveServerPage } from '../NerveServerPage';
+import { NerveNodeRouter } from '@node/NerveNodeRouter';
 
-import { NerveServerRequest } from '@types';
+import { NerveServerHTTPServer } from '../NerveServerHTTPServer';
+
+import { NerveNodeRequest } from '@types';
 
 import { INerveServerRoute } from '@interfaces';
 
 import { INerveServerRouterOptions } from './types';
 
-type AddRouteFn = (path: string, handler: (req: Request, res: Response) => void) => void;
-
 @Logger({ prefix: 'Router' })
-export class NerveServerRouter extends NerveServerObject {
+export class NerveServerRouter extends NerveNodeRouter {
 
 	protected options: INerveServerRouterOptions;
 	protected httpServer: NerveServerHTTPServer;
 
 	constructor(options: INerveServerRouterOptions) {
-		super();
-
-		this.options = options;
+		super(options);
 	}
 
 	init() {
@@ -36,39 +30,13 @@ export class NerveServerRouter extends NerveServerObject {
 		routes.forEach((route) => this.addRoute(route));
 	}
 
-	setHTTPServer(httpServer: NerveServerHTTPServer) {
-		this.httpServer = httpServer;
-	}
+	protected getRouteHandler(route: INerveServerRoute) {
+		const { page: Page } = route;
 
-	addRoute(route: INerveServerRoute) {
-		const {
-			path: routePath,
-			method = ENerveHTTPMethod.GET,
-			page,
-		} = route;
-
-		const express = this.httpServer.getExpress();
-		const handler = this.processingRequest(page);
-
-		let addRoute: AddRouteFn;
-
-		switch (method) {
-			case ENerveHTTPMethod.GET:
-				addRoute = express.get.bind(express) as AddRouteFn;
-				break;
-			case ENerveHTTPMethod.POST:
-				addRoute = express.post.bind(express) as AddRouteFn;
-				break;
-		}
-
-		addRoute(routePath, handler);
-	}
-
-	processingRequest(Page: typeof NerveServerPage) {
 		return (req: Request, res: Response) => {
 			const page = new Page({
 				app: this.options.app,
-				req: req as NerveServerRequest,
+				req: req as NerveNodeRequest,
 				res,
 			});
 

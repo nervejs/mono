@@ -1,0 +1,39 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"declaration": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": true,
+		"noUnusedLocals": true,
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"skipLibCheck": true,
+		"target": "es6",
+		"baseUrl": ".",
+		"paths": {
+			"@common/*": [ "../common/src/*" ],
+			"@api": [ "../common/src/api/index" ],
+			"@constants": [ "./src/constants/index" ],
+			"@constants/*": [ "./src/constants/*" ],
+			"@enums": [ "./src/enums/index" ],
+			"@enums/*": [ "./src/enums/*" ],
+			"@types": [ "./src/types/index" ],
+			"@types/*": [ "./src/types/*" ],
+			"@interfaces": [ "./src/interfaces/index" ],
+			"@interfaces/*": [ "./src/interfaces/*" ],
+			"@utils": [ "./src/utils/index" ],
+			"@utils/*": [ "./src/utils/*" ],
+			"@decorators": [ "./src/decorators/index" ],
+			"@decorators/*": [ "./src/decorators/*" ],
+
+			"*": [ "src/*" ]
+		},
+		"outDir": "./dist/"
+	},
+	"include": [
+		"typings/index.d.ts",
+		"src/**/*"
+	]
+}

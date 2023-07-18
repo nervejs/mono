@@ -1,6 +1,7 @@
+import { INerveNodeRouterOptions } from '@node/NerveNodeRouter';
+
 import { NerveServerApp } from '../NerveServerApp';
 
-export interface INerveServerRouterOptions {
+export interface INerveServerRouterOptions extends INerveNodeRouterOptions {
 	app: NerveServerApp;
-	workDir: string;
 }

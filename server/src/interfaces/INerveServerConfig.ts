@@ -1,13 +1,10 @@
-import { ENerveLocale, ENerveLogLevel } from '@enums';
+import { ENerveLocale } from '@enums';
+
+import { INerveNodeConfig } from '@node/interfaces';
 
 import { INerveServerUpstreamsConfigPoolItem } from './INerveServerUpstreamsConfigPoolItem';
 
-export interface INerveServerConfig {
-	isLocalServer: boolean;
-	http: {
-		host: string;
-		port: number;
-	};
+export interface INerveServerConfig extends INerveNodeConfig {
 	paths: {
 		templates: {
 			dir: string;
@@ -17,7 +14,6 @@ export interface INerveServerConfig {
 			fileName: string,
 		};
 	};
-	logLevel: ENerveLogLevel;
 	static: {
 		isMultiVersions: boolean;
 		versionsFiles: {
