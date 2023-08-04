@@ -2,7 +2,7 @@ import { INerveRestValidationError } from 'interfaces';
 import { TNerveRestParamPlacement } from 'types';
 import { ValidationError } from 'yup';
 
-import { ENerveHTTPStatus } from '@enums';
+import { ENerveHTTPStatus, ENerveRestParamType } from '@enums';
 
 import { NerveNodeObject } from '@node/NerveNodeObject';
 import { getDefaultLogPrefix } from '@node/utils';
@@ -29,20 +29,46 @@ export class NerveRestContext<T extends INerveRestContext> extends NerveNodeObje
 		return `${getDefaultLogPrefix({ requestId: this.options.requestId })} [${routePath}] [${user}]`;
 	}
 
+	protected castParams(placement: Exclude<TNerveRestParamPlacement, 'custom'>, params: Record<string, unknown>) {
+		const result = {} as Record<string, unknown>;
+
+		Object.keys(this.options.scheme[placement])
+			.forEach((paramName) => {
+				const paramScheme = this.options.scheme[placement][paramName];
+				const paramSourceValue = params[paramName];
+
+				if (paramSourceValue !== undefined) {
+					switch (paramScheme.type) {
+						case ENerveRestParamType.NUMBER:
+							result[paramName] = Number(paramSourceValue);
+							break;
+						case ENerveRestParamType.STRING:
+							result[paramName] = String(paramSourceValue);
+							break;
+						case ENerveRestParamType.BOOLEAN:
+							result[paramName] = paramSourceValue === 'true' || paramSourceValue === '1';
+							break;
+					}
+				}
+			});
+
+		return result;
+	}
+
 	get params() {
-		return this.options.data.params as T['params'];
+		return this.castParams('params', this.options.data.params) as T['params'];
 	}
 
 	get query() {
-		return this.options.data.query as T['query'];
+		return this.castParams('query', this.options.data.query) as T['query'];
 	}
 
 	get body() {
-		return this.options.data.body as T['body'];
+		return this.castParams('body', this.options.data.body) as T['body'];
 	}
 
 	get headers() {
-		return this.options.data.headers as T['headers'];
+		return this.castParams('headers', this.options.data.headers) as T['headers'];
 	}
 
 	protected async validateByPlacement(placement: Exclude<TNerveRestParamPlacement, 'custom'>): Promise<NerveRestValidationError[]> {
