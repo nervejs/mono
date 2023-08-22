@@ -6,6 +6,7 @@ import { Logger } from '@decorators';
 
 import { NerveNodeRouteHandler } from '@node/NerveNodeRouteHandler';
 
+import { NerveRestActiveUser } from '../NerveRestActiveUser';
 import { NerveRestApp } from '../NerveRestApp';
 import { NerveRestContext } from '../NerveRestContext';
 
@@ -17,6 +18,7 @@ import { INerveRestActionOptions, INerveRestActionScheme } from './types';
 export class NerveRestAction extends NerveNodeRouteHandler {
 
 	protected app: NerveRestApp;
+	protected activeUser: NerveRestActiveUser;
 	protected options: INerveRestActionOptions;
 	protected defaultContentType = ENerveContentType.JSON;
 
