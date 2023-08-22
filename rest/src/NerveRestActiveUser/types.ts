@@ -2,6 +2,6 @@ import { INerveNodeActiveUserOptions } from '@node/NerveNodeActiveUser';
 
 import { NerveRestApp } from '../NerveRestApp';
 
-export interface INerveServerActiveUserOptions extends INerveNodeActiveUserOptions {
+export interface INerveRestActiveUserOptions extends INerveNodeActiveUserOptions {
 	app: NerveRestApp;
 }

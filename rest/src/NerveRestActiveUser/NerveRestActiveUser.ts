@@ -4,12 +4,12 @@ import { NerveNodeActiveUser } from '@node/NerveNodeActiveUser';
 
 import { NerveRestApp } from '../NerveRestApp';
 
-import { INerveServerActiveUserOptions } from './types';
+import { INerveRestActiveUserOptions } from './types';
 
 @Logger({ prefix: 'ActiveUser' })
 export class NerveRestActiveUser extends NerveNodeActiveUser {
 
-	protected options: INerveServerActiveUserOptions;
+	protected options: INerveRestActiveUserOptions;
 
 	protected app: NerveRestApp;
 
