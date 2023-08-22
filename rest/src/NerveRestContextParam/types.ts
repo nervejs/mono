@@ -7,7 +7,7 @@ import { INerveRestValidationError } from '@interfaces';
 export interface INerveRestContextParamOptionsNonGeneric {
 	validation?: {
 		yup: Schema;
-		custom?: (value: unknown) => Promise<INerveRestValidationError>;
+		custom?: (value: unknown) => Promise<INerveRestValidationError | null>;
 	},
 	type: ENerveRestParamType;
 }
