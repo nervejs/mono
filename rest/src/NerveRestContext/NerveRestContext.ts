@@ -207,10 +207,10 @@ export class NerveRestContext<T extends INerveRestContext> extends NerveNodeObje
 }
 
 export type CtxType<T extends INerveRestContextOptions['scheme']> = {
-	params?: CtxParamsType<T['params']>;
-	query?: CtxParamsType<T['query']>;
-	body?: CtxParamsType<T['body']>;
-	headers?: CtxParamsType<T['headers']>;
+	params: CtxParamsType<T['params']>;
+	query: CtxParamsType<T['query']>;
+	body: CtxParamsType<T['body']>;
+	headers: CtxParamsType<T['headers']>;
 }
 
 export const addCtxValidation = (scheme: INerveRestContextOptions['scheme'], validation: (ctx?: NerveRestContext<unknown>) => Promise<INerveRestValidationError>) => {
