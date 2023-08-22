@@ -87,7 +87,7 @@ export class NerveServerRequest extends NerveNodeObject {
 			.map((header) => header.toLowerCase())
 			.includes('content-type');
 
-		return {
+		const requestHeaders: Record<string, string> = {
 			...(isIgnoreSourceHeaders ? {} : req.headers),
 			...headers,
 			...this.upstream.extra.headers,
@@ -99,6 +99,13 @@ export class NerveServerRequest extends NerveNodeObject {
 					}
 			),
 		};
+
+		if (!hasBody) {
+			delete requestHeaders['content-length'];
+			delete requestHeaders['Content-Length'];
+		}
+
+		return requestHeaders;
 	}
 
 	protected beforeFetch() {

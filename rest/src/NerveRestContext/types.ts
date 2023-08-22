@@ -1,5 +1,4 @@
-import { NerveNodeActiveUser } from '@node/NerveNodeActiveUser';
-
+import { NerveRestActiveUser } from '../NerveRestActiveUser';
 import { NerveRestApp } from '../NerveRestApp';
 import { INerveRestContextParamOptions } from '../NerveRestContextParam';
 import type { NerveRestContext } from './NerveRestContext';
@@ -11,7 +10,7 @@ import { INerveRestValidationError } from '@interfaces';
 export interface INerveRestContextOptions {
 	app: NerveRestApp;
 	requestId: string;
-	activeUser: NerveNodeActiveUser;
+	activeUser: NerveRestActiveUser;
 	req: NerveNodeRequest;
 	scheme: {
 		params?: Record<string, INerveRestContextParamOptions<unknown>>;
