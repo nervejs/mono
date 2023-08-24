@@ -11,7 +11,8 @@
 		"eslint-common": "cd ./common && npm run eslint",
 		"eslint-rest": "cd ./rest && npm run eslint",
 		"eslint-server": "cd ./server && npm run eslint",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"publish:all": "cd common && npm publish && cd ../rest && npm publish && cd ../server && npm publish"
 	},
 	"author": "denis.yarkeev@gmail.com",
 	"license": "MIT",
