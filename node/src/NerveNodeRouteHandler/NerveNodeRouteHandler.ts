@@ -227,7 +227,7 @@ export class NerveNodeRouteHandler extends NerveNodeObject {
 	getFullProcessingTime() {
 		const { start, end } = this.timings;
 
-		return end - start;
+		return Math.max(end - start, 1);
 	}
 
 	getProcessingResponseDuration() {

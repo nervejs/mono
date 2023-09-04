@@ -495,7 +495,7 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 		const { initActiveUser, fetchData } = this.timings;
 		const fullTime = this.getFullProcessingTime();
 
-		return fullTime - initActiveUser - fetchData;
+		return Math.max(fullTime - initActiveUser - fetchData, 1);
 	}
 
 }
