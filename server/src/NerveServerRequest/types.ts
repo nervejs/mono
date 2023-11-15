@@ -36,6 +36,13 @@ export interface INerveServerRequestParams {
 	body?: unknown;
 }
 
+export interface INerveServerRequestDirectOptions extends Omit<INerveServerRequestOptions, 'activeUser' | 'req' | 'requestId'> {}
+
+export interface INerveServerRequestDirectParams extends Omit<INerveServerRequestParams, 'upstream'> {
+	host: string;
+	protocol: string;
+}
+
 export interface INerveServerRequestResponse<R = unknown> {
 	data: R;
 	raw: string;

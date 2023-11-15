@@ -68,7 +68,7 @@ export class NerveServerLocalesManager extends NerveNodeObject {
 
 			this.translations[locale] = this.walkLocales(locale, JSON.parse(content) as Record<string, unknown>) as Record<string, string>;
 		} catch (err) {
-			this.log.error(`Failed read locales JSON: `, err as Error);
+			this.logError(`Failed read locales JSON: `, err as Error);
 		}
 	}
 
@@ -125,7 +125,7 @@ export class NerveServerLocalesManager extends NerveNodeObject {
 									translations: locales.translations,
 								});
 							} catch (err) {
-								this.log.error('Failed read locales: ', err as Error);
+								this.logError('Failed read locales: ', err as Error);
 
 								resolve(null);
 							}

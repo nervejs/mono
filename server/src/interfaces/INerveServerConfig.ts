@@ -27,6 +27,19 @@ export interface INerveServerConfig extends INerveNodeConfig {
 		list: ENerveLocale[];
 		isEnabled: boolean;
 		isFallbackToSource: boolean;
+		isNewManager: boolean;
+		server: {
+			host: string;
+			protocol: string;
+			prefixUrl: string;
+			projectId: string;
+		};
+		socket: {
+			isEnabled: boolean;
+			host: string;
+			port: number;
+			retryConnectTimeout: number;
+		};
 	};
 	render: {
 		isCacheEnabled: boolean;

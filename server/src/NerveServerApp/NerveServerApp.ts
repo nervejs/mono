@@ -6,6 +6,8 @@ import { NerveNodeApp } from '@node/NerveNodeApp';
 
 import { NerveServerHTTPServer } from '../NerveServerHTTPServer';
 import { NerveServerLocalesManager } from '../NerveServerLocalesManager';
+import { NerveServerLocalesManagerNew } from '../NerveServerLocalesManagerNew';
+import { NerveServerRequest } from '../NerveServerRequest';
 import { NerveServerRouter } from '../NerveServerRouter';
 import { NerveServerStaticManager } from '../NerveServerStaticManager';
 import { NerveServerUpstreamBalancer } from '../NerveServerUpstreamBalancer';
@@ -41,6 +43,19 @@ export class NerveServerApp extends NerveNodeApp {
 			list: [],
 			isEnabled: false,
 			isFallbackToSource: true,
+			isNewManager: false,
+			server: {
+				host: '',
+				protocol: '',
+				prefixUrl: '',
+				projectId: '',
+			},
+			socket: {
+				isEnabled: false,
+				host: '',
+				port: null,
+				retryConnectTimeout: 5000,
+			},
 		},
 		render: {
 			isCacheEnabled: true,
@@ -60,7 +75,7 @@ export class NerveServerApp extends NerveNodeApp {
 		},
 	};
 	public staticManager: NerveServerStaticManager;
-	public localesManager: NerveServerLocalesManager;
+	public localesManager: NerveServerLocalesManager | NerveServerLocalesManagerNew;
 	public upstreamBalancer: NerveServerUpstreamBalancer;
 
 	protected options: INerveServerAppOptions;
@@ -75,8 +90,8 @@ export class NerveServerApp extends NerveNodeApp {
 		await super.init();
 
 		await this.initStaticManager();
-		await this.initLocalesManager();
 		await this.initUpstreamBalancer();
+		await this.initLocalesManager();
 	}
 
 	public getTemplatesDir() {
@@ -85,6 +100,10 @@ export class NerveServerApp extends NerveNodeApp {
 
 	public getLocalesDir() {
 		return this.config.paths.locales.dir;
+	}
+
+	public getRequestModule() {
+		return NerveServerRequest;
 	}
 
 	protected initHttpServer() {
@@ -114,9 +133,15 @@ export class NerveServerApp extends NerveNodeApp {
 	}
 
 	protected async initLocalesManager() {
-		this.localesManager = new NerveServerLocalesManager({
-			app: this,
-		});
+		if (this.config.locales.isNewManager) {
+			this.localesManager = new NerveServerLocalesManagerNew({
+				app: this,
+			});
+		} else {
+			this.localesManager = new NerveServerLocalesManager({
+				app: this,
+			});
+		}
 
 		if (this.getLocalesDir()) {
 			await this.localesManager.init();

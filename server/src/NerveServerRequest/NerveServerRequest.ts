@@ -14,16 +14,18 @@ import {
 	INerveServerRequestOptions,
 	INerveServerRequestParams,
 	INerveServerRequestResponse,
+	INerveServerRequestDirectParams,
+	INerveServerRequestDirectOptions,
 } from './types';
 
 @Logger({ prefix: 'Request' })
 export class NerveServerRequest extends NerveNodeObject {
 
-	protected options: INerveServerRequestOptions;
+	protected options: INerveServerRequestOptions | INerveServerRequestDirectOptions;
 
 	protected id = uuid();
 
-	protected params: INerveServerRequestParams;
+	protected params: INerveServerRequestParams | INerveServerRequestDirectParams;
 
 	protected upstream: Upstream<INerveServerUpstreamsConfigPoolItemExtra>;
 
@@ -35,7 +37,7 @@ export class NerveServerRequest extends NerveNodeObject {
 
 	protected endTimestamp: number;
 
-	constructor(options: INerveServerRequestOptions) {
+	constructor(options: INerveServerRequestOptions | INerveServerRequestDirectOptions) {
 		super();
 
 		this.options = {
@@ -62,13 +64,21 @@ export class NerveServerRequest extends NerveNodeObject {
 	}
 
 	protected getLogPrefix() {
-		return `${getDefaultLogPrefix({ requestId: this.options.requestId })} [${this.id}]`;
+		return `${getDefaultLogPrefix({ requestId: (this.options as INerveServerRequestOptions).requestId })} [${this.id}]`;
 	}
 
 	protected initUpstream() {
-		const { upstream } = this.params;
+		const { upstream } = this.params as INerveServerRequestParams;
+		const { host, protocol } = this.params as INerveServerRequestDirectParams;
 
-		this.upstream = this.options.app.upstreamBalancer.get(upstream);
+		if (!upstream && host) {
+			this.upstream = new Upstream({
+				server: host,
+				extra: { protocol },
+			});
+		} else {
+			this.upstream = this.options.app.upstreamBalancer.get(upstream);
+		}
 
 		if (!this.upstream) {
 			throw Error('UPSTREAM_NOT_FOUND');
@@ -81,14 +91,14 @@ export class NerveServerRequest extends NerveNodeObject {
 
 	protected getRequestHeaders(): Record<string, string> {
 		const { headers = {}, body, method } = this.params;
-		const { req, isIgnoreSourceHeaders } = this.options;
+		const { isIgnoreSourceHeaders } = this.options;
 		const hasBody = Boolean(body) && !['get', 'delete'].includes(String(method).toLocaleLowerCase());
 		const hasContentTypeHeader = Object.keys(headers)
 			.map((header) => header.toLowerCase())
 			.includes('content-type');
 
 		const requestHeaders: Record<string, string> = {
-			...(isIgnoreSourceHeaders ? {} : req.headers),
+			...(isIgnoreSourceHeaders ? {} : (this.options as INerveServerRequestOptions).req?.headers || {}),
 			...headers,
 			...this.upstream.extra.headers,
 			...(
@@ -216,7 +226,7 @@ export class NerveServerRequest extends NerveNodeObject {
 		};
 	}
 
-	async fetch<R = unknown>(params: INerveServerRequestParams): Promise<INerveServerRequestResponse<R>> {
+	async fetch<R = unknown>(params: INerveServerRequestParams | INerveServerRequestDirectParams): Promise<INerveServerRequestResponse<R>> {
 		let error: unknown = null;
 
 		this.params = params;
@@ -245,6 +255,13 @@ export class NerveServerRequest extends NerveNodeObject {
 		const instance = new this(options);
 
 		return instance.fetch<R>(params);
+	}
+
+	static async fetchDirect<R = unknown>(options: INerveServerRequestDirectOptions, params: INerveServerRequestDirectParams) {
+		return this.fetch<R>(
+			options as INerveServerRequestOptions,
+			params as unknown as INerveServerRequestParams,
+		);
 	}
 
 }

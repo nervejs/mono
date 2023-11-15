@@ -70,6 +70,10 @@ export abstract class NerveNodeApp extends NerveNodeObject {
 		this.instanceId = instanceId;
 	}
 
+	public getInstanceId() {
+		return this.instanceId;
+	}
+
 	protected async readConfig() {
 		try {
 			const configFilePath = path.resolve(this.options.workDir, 'nerverc.json');

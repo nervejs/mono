@@ -391,7 +391,7 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 
 		return {
 			staticVersion,
-			locales: this.getLocalesVars(),
+			locales: this.getLocalesVars() as unknown as Record<string, string>,
 			req: {
 				url: this.options.req.url,
 				path: this.options.req.path,
