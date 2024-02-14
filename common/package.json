@@ -1,6 +1,6 @@
 {
 	"name": "@nervejs/common",
-	"version": "0.2.1",
+	"version": "0.2.3",
 	"description": "",
 	"main": "dist/index",
 	"typings": "dist/index",
