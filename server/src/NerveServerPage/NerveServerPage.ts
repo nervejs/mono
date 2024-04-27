@@ -6,7 +6,7 @@ import { ENerveContentType, ENerveHTTPStatus, ENerveLocale } from '@enums';
 
 import { Logger } from '@decorators';
 
-import { NerveNodeRouteHandler } from '@node/NerveNodeRouteHandler';
+import { INerveNodeRouteHandlerBeforeProcessingResult, NerveNodeRouteHandler } from '@node/NerveNodeRouteHandler';
 
 import { NerveHttpTransport } from '../NerveHttpTransport';
 import { NerveServerActiveUser } from '../NerveServerActiveUser';
@@ -52,6 +52,7 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 		footer: null,
 		fetchData: null,
 	};
+	protected preFetchedData: unknown = {};
 	protected fetchedData: unknown = {};
 	protected activeUser: NerveServerActiveUser;
 	protected defaultContentType = ENerveContentType.TEXT_HTML;
@@ -207,19 +208,44 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 		return { isAbort: false };
 	}
 
+	protected async afterPrefetchDataWrapper() {
+		const startAfterPrefetchDataTimestamp = Date.now();
+
+		const result = await this.afterPrefetchData();
+
+		this.timings.afterPrefetchData = Date.now() - startAfterPrefetchDataTimestamp;
+		this.logDebug(`After prefetch data (isAbort=${String(result.isAbort)}): ${this.timings.afterPrefetchData}ms`);
+
+		return result;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/require-await
+	protected async afterPrefetchData(): Promise<INerveNodeRouteHandlerBeforeProcessingResult> {
+		return { isAbort: false };
+	}
+
 	protected async processing() {
 		try {
 			const templateVarsMap = await this.getTemplateVarsMap();
 
 			this.prepareTemplates();
-			await this.fetchDataWrapper(templateVarsMap);
-			const resultTemplateVarsMap = await this.getPostProcessedVarsAfterFetchDataWrapper(templateVarsMap);
-			const content = await this.getResponseByTemplateVars(resultTemplateVarsMap);
 
-			await this.sendResponse({
-				content,
-				contentType: this.isResponseAsJson() ? ENerveContentType.JSON : ENerveContentType.TEXT_HTML,
-			});
+			await this.preFetchDataWrapper(templateVarsMap);
+
+			const { isAbort } = await this.afterPrefetchDataWrapper();
+
+			if (isAbort) {
+				this.logDebug(`Processing skipped by afterPrefetchData`);
+			} else {
+				await this.fetchDataWrapper(templateVarsMap);
+				const resultTemplateVarsMap = await this.getPostProcessedVarsAfterFetchDataWrapper(templateVarsMap);
+				const content = await this.getResponseByTemplateVars(resultTemplateVarsMap);
+
+				await this.sendResponse({
+					content,
+					contentType: this.isResponseAsJson() ? ENerveContentType.JSON : ENerveContentType.TEXT_HTML,
+				});
+			}
 		} catch (err) {
 			this.errorLog('Failed processing page', err as Error);
 
@@ -271,10 +297,37 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 		await super.run();
 	}
 
+	protected async preFetchDataWrapper(templateVarsMap: INerveServerPageTemplateVarsMap) {
+		const startFetchDataTimeStamp = Date.now();
+
+		this.preFetchedData = await this.preFetchData(templateVarsMap);
+
+		this.timings.preFetchData = Date.now() - startFetchDataTimeStamp;
+		this.logDebug(`Fetch data: ${this.timings.preFetchData} ms`);
+	}
+
+	protected async preFetchData(templateVarsMap: INerveServerPageTemplateVarsMap) {
+		if (this.includedTemplates.fetchData && !this.isSimpleIncludedTemplate(this.includedTemplates.fetchData.module)) {
+			const { common, content } = templateVarsMap;
+			const { preFetchData } = this.includedTemplates.fetchData.module;
+
+			if (typeof preFetchData === 'function') {
+				return preFetchData({ ...common, ...content });
+			}
+		}
+
+		return {};
+	}
+
 	protected async fetchDataWrapper(templateVarsMap: INerveServerPageTemplateVarsMap) {
 		const startFetchDataTimeStamp = Date.now();
 
-		this.fetchedData = await this.fetchData(templateVarsMap);
+		const fetchedData = await this.fetchData(templateVarsMap);
+
+		this.fetchedData = {
+			...fetchedData as Record<string, unknown>,
+			...this.preFetchedData as Record<string, unknown>,
+		};
 
 		this.timings.fetchData = Date.now() - startFetchDataTimeStamp;
 		this.logDebug(`Fetch data: ${this.timings.fetchData} ms`);

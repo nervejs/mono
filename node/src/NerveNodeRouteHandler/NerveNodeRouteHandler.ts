@@ -190,7 +190,7 @@ export class NerveNodeRouteHandler extends NerveNodeObject {
 			const { isAbort } = await this.beforeProcessingWrapper();
 
 			if (isAbort) {
-				this.logDebug(`Processing skipped`);
+				this.logDebug(`Processing skipped by beforeProcessing`);
 			} else {
 				await this.processingWrapper();
 			}

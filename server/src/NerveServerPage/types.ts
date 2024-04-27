@@ -82,5 +82,7 @@ export interface INerveServerPageTimings extends INerveNodeRouteHandlerTimings {
 		footer: number;
 		all: number;
 	};
+	preFetchData: number;
+	afterPrefetchData: number;
 	fetchData: number;
 }
