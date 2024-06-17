@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/named
-import { merge } from 'lodash';
+import { mergeWith } from 'lodash';
 import * as path from 'path';
 // eslint-disable-next-line import/named
 import { IResult as IUAParserResult, UAParser } from 'ua-parser-js';
@@ -326,10 +326,11 @@ export class NerveServerPage extends NerveNodeRouteHandler {
 
 		const fetchedData = await this.fetchData(templateVarsMap);
 
-		this.fetchedData = merge(
+		this.fetchedData = mergeWith(
 			{},
 			this.preFetchedData as Record<string, unknown>,
 			fetchedData as Record<string, unknown>,
+			(a: unknown, b: unknown) => !b ? a : undefined,
 		);
 
 		this.timings.fetchData = Date.now() - startFetchDataTimeStamp;
