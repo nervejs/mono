@@ -142,24 +142,26 @@ export class NerveServerRequest extends NerveNodeObject {
 		const method = String(this.params.method || 'GET').toUpperCase();
 		const duration = this.endTimestamp - this.startTimestamp;
 
-		if (this.options.log.response.status) {
-			this.logInfo(`Response Status: ${this.response.status}`);
-		}
-
-		if (this.options.log.response.headers) {
-			this.logInfo(`Response Headers: ${JSON.stringify(this.response.headers)}`);
-		}
-
-		if (this.options.log.response.body) {
-			this.logInfo(`Response Body: ${this.response.raw}`);
-		}
-
 		if (this.options.log.duration) {
 			this.logDebug(`Duration: ${duration}ms`);
 		}
 
-		if (this.options.log.summary) {
-			this.logInfo(`${method} ${this.getRequestUrl()} ${this.response.status} ${duration}ms`);
+		if (this.response) {
+			if (this.options.log.response.status) {
+				this.logInfo(`Response Status: ${this.response.status}`);
+			}
+
+			if (this.options.log.response.headers) {
+				this.logInfo(`Response Headers: ${JSON.stringify(this.response.headers)}`);
+			}
+
+			if (this.options.log.response.body) {
+				this.logInfo(`Response Body: ${this.response.raw}`);
+			}
+
+			if (this.options.log.summary) {
+				this.logInfo(`${method} ${this.getRequestUrl()} ${this.response.status} ${duration}ms`);
+			}
 		}
 	}
 
@@ -240,6 +242,7 @@ export class NerveServerRequest extends NerveNodeObject {
 			this.response = await this.send<R>();
 		} catch (err) {
 			error = err;
+			this.logError('Request failed with error', err);
 		} finally {
 			this.afterFetch();
 		}

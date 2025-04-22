@@ -2,6 +2,11 @@
 	"name": "@nervejs/server",
 	"version": "0.2.8",
 	"description": "",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nervejs/mono",
+		"directory": "server"
+	},
 	"main": "dist/server/src/index",
 	"typings": "dist/server/src/index",
 	"scripts": {

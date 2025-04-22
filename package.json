@@ -1,6 +1,7 @@
 {
 	"name": "@nervejs/mono",
 	"version": "1.0.0",
+	"repository": "https://github.com/nervejs/mono",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
