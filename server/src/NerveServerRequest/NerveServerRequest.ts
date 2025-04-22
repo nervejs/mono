@@ -242,6 +242,7 @@ export class NerveServerRequest extends NerveNodeObject {
 			this.response = await this.send<R>();
 		} catch (err) {
 			error = err;
+			this.logError('Request failed with error', err);
 		} finally {
 			this.afterFetch();
 		}
