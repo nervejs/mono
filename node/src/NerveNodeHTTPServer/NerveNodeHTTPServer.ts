@@ -69,10 +69,18 @@ export class NerveNodeHTTPServer extends NerveNodeObject {
 
 	initMiddlewares() {
 		this.express.use(cookieParser());
-		this.express.use(bodyParser.urlencoded({
-			extended: false,
-			limit: this.maxBodySize,
-		}));
+		this.express.use(
+			bodyParser.urlencoded({
+				type: 'application/x-www-form-urlencoded',
+				extended: false,
+				limit: this.maxBodySize,
+			}),
+		);
+		this.express.use(
+			bodyParser.json({
+				type: 'application/json',
+			}),
+		);
 
 		this.express.use((req: NerveNodeRequest, res, next) => {
 			const method = req.method.toUpperCase();
