@@ -241,7 +241,7 @@ export class NerveServerRequest extends NerveNodeObject {
 			this.afterFetch();
 		} catch (err) {
 			error = err;
-			this.logError(err);
+			this.logError('Request failed', err as Error);
 		}
 
 		if (error) {
